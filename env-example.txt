@@ -1,0 +1,7 @@
+# Azure MySQL 연결 정보 (실제 값으로 변경 후 .env로 저장)
+DB_USERNAME=insightops_admin
+DB_PASSWORD=your_actual_password
+
+# Spring Boot 설정
+SPRING_PROFILES_ACTIVE=dev
+

@@ -1,19 +1,17 @@
-# Backend Dockerfile for insightops-dashboard-backend
-FROM node:18-alpine
+# Spring Boot Runtime
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-# Copy package files first (for better caching)
-COPY package*.json ./
+# Copy the pre-built jar file
+COPY target/dashboard-backend-1.0.0.jar app.jar
 
-# Install dependencies
-RUN npm install
+# Expose port
+EXPOSE 3002
 
-# Copy source code
-COPY . .
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3002/health || exit 1
 
-# Expose port (adjust as needed for your backend)
-EXPOSE 3000
-
-# Start the backend application
-CMD ["npm", "start"]
+# Start the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
