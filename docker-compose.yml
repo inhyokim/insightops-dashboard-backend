@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  backend:
+    image: inhyokim/insightops-dashboard-backend:latest
+    container_name: insightops-dashboard-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    networks:
+      - insightops-network
+    restart: unless-stopped
+
+networks:
+  insightops-network:
+    driver: bridge
