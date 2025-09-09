@@ -22,8 +22,8 @@ public class MessagePreviewCache {
     private Long messageId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "small_category_id")
-    private DimSmallCategory smallCategory;
+    @JoinColumn(name = "consulting_category_id")  // small_category_id -> consulting_category_id
+    private DimSmallCategory consultingCategory;
 
     @Column(name = "to_email", length = 100)
     private String toEmail;

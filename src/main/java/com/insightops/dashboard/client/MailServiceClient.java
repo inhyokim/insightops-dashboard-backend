@@ -1,6 +1,8 @@
 package com.insightops.dashboard.client;
 
 import com.insightops.dashboard.domain.MessagePreviewCache;
+import com.insightops.dashboard.dto.MailPreviewDto;
+import com.insightops.dashboard.dto.MailSendRequestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -30,17 +32,15 @@ public class MailServiceClient {
     /**
      * 메일 템플릿 미리보기를 외부 메일 서비스에서 가져옴
      */
-    public String generateMailPreview(Long smallCategoryId, String assigneeEmail) {
+    public MailPreviewDto generateMailPreview(Long vocEventId) {
         try {
-            String url = mailServiceUrl + "/api/mail/preview" +
-                "?smallCategoryId=" + smallCategoryId +
-                "&assigneeEmail=" + assigneeEmail;
+            String url = mailServiceUrl + "/api/mail/preview?vocEventId=" + vocEventId;
             
-            var response = restTemplate.getForObject(url, Map.class);
-            return response != null ? (String) response.get("preview") : "";
+            var response = restTemplate.getForObject(url, MailPreviewDto.class);
+            return response != null ? response : new MailPreviewDto();
             
         } catch (RestClientException e) {
-            return "메일 미리보기를 가져올 수 없습니다.";
+            return new MailPreviewDto();
         }
     }
     
@@ -68,22 +68,35 @@ public class MailServiceClient {
     /**
      * 메일 발송 요청
      */
-    public boolean sendMail(Long smallCategoryId, String assigneeEmail, String subject, String body) {
+    public void sendMail(MailSendRequestDto request) {
         try {
-            Map<String, Object> mailRequest = Map.of(
-                "smallCategoryId", smallCategoryId,
-                "assigneeEmail", assigneeEmail,
-                "subject", subject,
-                "body", body
-            );
-            
             String url = mailServiceUrl + "/api/mail/send";
-            var response = restTemplate.postForObject(url, mailRequest, Map.class);
-            
-            return response != null && Boolean.TRUE.equals(response.get("success"));
+            restTemplate.postForEntity(url, request, Void.class);
             
         } catch (RestClientException e) {
-            return false;
+            // 로깅 및 예외 처리
+            throw new RuntimeException("메일 발송 실패", e);
+        }
+    }
+    
+    /**
+     * 최근 메일 미리보기 캐시 조회
+     */
+    public List<MessagePreviewCache> getRecentMailPreviews() {
+        try {
+            String url = mailServiceUrl + "/api/mail/recent-previews";
+            
+            var response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<MessagePreviewCache>>() {}
+            );
+            
+            return response.getBody() != null ? response.getBody() : Collections.emptyList();
+            
+        } catch (RestClientException e) {
+            return Collections.emptyList();
         }
     }
 }

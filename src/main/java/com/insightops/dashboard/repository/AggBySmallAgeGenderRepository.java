@@ -13,57 +13,45 @@ import java.util.Optional;
 @Repository
 public interface AggBySmallAgeGenderRepository extends JpaRepository<AggBySmallAgeGender, Long> {
 
-    // Projection 인터페이스 - Small 카테고리 트렌드용
-    interface SmallTrend {
-        String getSmallName();
-        Long getCnt();
-    }
-
-    // Projection 인터페이스 - Top Small 카테고리 비중용
-    interface TopSmallShare {
+    interface TopSmallRow {
         String getSmallName();
         Long getCnt();
         Long getTotalCnt();
     }
 
-    /**
-     * Small 카테고리 트렌드 분석 (필터: 연령, 성별)
-     */
+    interface SmallTrendRow {
+        String getSmallName();
+        Long getCnt();
+    }
+
     @Query(value = """
-        SELECT sc.name as smallName, SUM(a.count) as cnt
-        FROM agg_by_small_age_gender a
-        JOIN dim_small_category sc ON sc.small_category_id = a.small_category_id
-        WHERE a.granularity = :granularity
-          AND a.bucket_start BETWEEN :from AND :to
-          AND (:age IS NULL OR a.age_band = :age)
-          AND (:gender IS NULL OR a.gender = :gender)
-        GROUP BY sc.name
+        SELECT sc.name as smallName, SUM(agg.count) as cnt, 
+               (SELECT SUM(count) FROM agg_by_small_age_gender WHERE bucket_start = :month) as totalCnt
+        FROM agg_by_small_age_gender agg
+        JOIN dim_small_category sc ON agg.consulting_category_id = sc.small_category_id
+        WHERE agg.granularity = 'month' AND agg.bucket_start = :month
+        GROUP BY sc.small_category_id, sc.name
+        ORDER BY cnt DESC
+        LIMIT 1
+        """, nativeQuery = true)
+    Optional<TopSmallRow> findTopSmallOfMonth(@Param("month") LocalDate month);
+
+    @Query(value = """
+        SELECT sc.name as smallName, SUM(agg.count) as cnt
+        FROM agg_by_small_age_gender agg
+        JOIN dim_small_category sc ON agg.consulting_category_id = sc.small_category_id
+        WHERE agg.granularity = :granularity 
+        AND agg.bucket_start BETWEEN :from AND :to
+        AND (:clientAge IS NULL OR agg.client_age = :clientAge)
+        AND (:clientGender IS NULL OR agg.client_gender = :clientGender)
+        GROUP BY sc.small_category_id, sc.name
         ORDER BY cnt DESC
         LIMIT :limit
         """, nativeQuery = true)
-    List<SmallTrend> findSmallTrends(@Param("granularity") String granularity,
-                                    @Param("from") LocalDate from,
-                                    @Param("to") LocalDate to,
-                                    @Param("age") String age,
-                                    @Param("gender") String gender,
-                                    @Param("limit") int limit);
-
-    /**
-     * 이달 가장 많은 문의 Small 카테고리와 비중 조회 (오버뷰용)
-     */
-    @Query(value = """
-        WITH sums AS (
-          SELECT sc.name as smallName, SUM(a.count) as cnt
-          FROM agg_by_small_age_gender a
-          JOIN dim_small_category sc ON sc.small_category_id = a.small_category_id
-          WHERE a.granularity = 'month' AND a.bucket_start = :firstDayOfMonth
-          GROUP BY sc.name
-        ),
-        total AS (SELECT SUM(cnt) totalCnt FROM sums)
-        SELECT s.smallName, s.cnt, t.totalCnt
-        FROM sums s CROSS JOIN total t
-        ORDER BY s.cnt DESC LIMIT 1
-        """, nativeQuery = true)
-    Optional<TopSmallShare> findTopSmallOfMonth(@Param("firstDayOfMonth") LocalDate firstDayOfMonth);
+    List<SmallTrendRow> findSmallTrends(@Param("granularity") String granularity,
+                                       @Param("from") LocalDate from,
+                                       @Param("to") LocalDate to,
+                                       @Param("clientAge") String clientAge,
+                                       @Param("clientGender") String clientGender,
+                                       @Param("limit") int limit);
 }
-

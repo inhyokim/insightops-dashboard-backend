@@ -1,7 +1,7 @@
 package com.insightops.dashboard.service;
 
-import com.insightops.dashboard.client.NormalizationServiceClient;
 import com.insightops.dashboard.client.MailServiceClient;
+import com.insightops.dashboard.client.NormalizationServiceClient;
 import com.insightops.dashboard.domain.InsightCard;
 import com.insightops.dashboard.domain.MessagePreviewCache;
 import com.insightops.dashboard.dto.*;
@@ -15,6 +15,10 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 대시보드 서비스 - 인사이트 & 메일 관련 로직
+ * 집계 쿼리는 DashboardQueryService로 분리
+ */
 @Service
 @Transactional(readOnly = true)
 public class DashboardService {
@@ -24,8 +28,10 @@ public class DashboardService {
     private final AggBySmallAgeGenderRepository aggSmallRepo;
     private final InsightCardRepository insightRepo;
     private final MessagePreviewCacheRepository messageRepo;
+    private final VocEventRepository vocEventRepo;
+    private final VocSummaryRepository vocSummaryRepo;
     
-    // 외부 서비스 클라이언트 추가
+    // 외부 서비스 클라이언트
     private final NormalizationServiceClient normalizationClient;
     private final MailServiceClient mailClient;
     
@@ -34,6 +40,8 @@ public class DashboardService {
                            AggBySmallAgeGenderRepository aggSmallRepo,
                            InsightCardRepository insightRepo,
                            MessagePreviewCacheRepository messageRepo,
+                           VocEventRepository vocEventRepo,
+                           VocSummaryRepository vocSummaryRepo,
                            NormalizationServiceClient normalizationClient,
                            MailServiceClient mailClient) {
         this.aggTotalRepo = aggTotalRepo;
@@ -41,6 +49,8 @@ public class DashboardService {
         this.aggSmallRepo = aggSmallRepo;
         this.insightRepo = insightRepo;
         this.messageRepo = messageRepo;
+        this.vocEventRepo = vocEventRepo;
+        this.vocSummaryRepo = vocSummaryRepo;
         this.normalizationClient = normalizationClient;
         this.mailClient = mailClient;
     }
@@ -49,7 +59,6 @@ public class DashboardService {
      * A. 오버뷰 화면 데이터 조회 (로컬 캐시 사용)
      */
     public OverviewDto getOverview(YearMonth yearMonth) {
-        
         LocalDate first = yearMonth.atDay(1);
         LocalDate prevFirst = yearMonth.minusMonths(1).atDay(1);
 
@@ -74,7 +83,6 @@ public class DashboardService {
      * B. Big 카테고리 비중 데이터 조회 (파이차트용) - 로컬 캐시
      */
     public List<ShareItem> getBigCategoryShare(String granularity, LocalDate from, LocalDate to) {
-        
         var rows = aggBigRepo.findShare(granularity, from, to);
         long total = rows.stream().mapToLong(AggByBigCategoryRepository.ShareRow::getCnt).sum();
         
@@ -91,7 +99,6 @@ public class DashboardService {
      * C. 전체 VoC 변화량 시계열 데이터 조회 (라인차트용) - 로컬 캐시
      */
     public List<SeriesPoint> getTotalSeries(String granularity, LocalDate from, LocalDate to) {
-        
         return aggTotalRepo.findSeries(granularity, from, to).stream()
             .map(p -> new SeriesPoint(p.getBucketStart(), p.getTotalCount()))
             .toList();
@@ -101,9 +108,8 @@ public class DashboardService {
      * D. Small 카테고리 트렌드 분석 (필터: 연령, 성별) - 로컬 캐시
      */
     public List<SmallTrendItem> getSmallTrends(String granularity, LocalDate from, LocalDate to,
-                                               String age, String gender, int limit) {
-        
-        return aggSmallRepo.findSmallTrends(granularity, from, to, age, gender, limit).stream()
+                                               String clientAge, String clientGender, int limit) {
+        return aggSmallRepo.findSmallTrends(granularity, from, to, clientAge, clientGender, limit).stream()
             .map(r -> new SmallTrendItem(r.getSmallName(), r.getCnt()))
             .toList();
     }
@@ -116,52 +122,53 @@ public class DashboardService {
     }
 
     /**
-     * F. 상담 사례 목록 + 요약 조회 - 외부 정규화 서비스 호출
+     * F. 상담 사례 목록 + 요약 조회 - 로컬 데이터 조회
      */
-    public List<CaseItem> getCases(Instant from, Instant to, Long smallCategoryId, int page, int size) {
-        // 외부 정규화 서비스에서 VoC 케이스 목록을 가져옴
-        return normalizationClient.getVocCases(from, to, smallCategoryId, page, size);
+    public List<CaseItem> getCases(LocalDate from, LocalDate to, Long consultingCategoryId, int page, int size) {
+        int offset = page * size;
+        
+        // VocEvent 조회
+        var vocEvents = vocEventRepo.findVocEvents(from, to, consultingCategoryId, offset, size);
+        
+        return vocEvents.stream()
+            .map(ve -> {
+                // VocSummary 조회
+                var summary = vocSummaryRepo.findByVocEventId(ve.getVocEventId())
+                    .map(vs -> vs.getSummaryText())
+                    .orElse("요약 정보 없음");
+                
+                return new CaseItem(
+                    ve.getVocEventId(),
+                    ve.getSourceId(),
+                    ve.getConsultingDate().toString(),
+                    ve.getBigCategoryName(),
+                    ve.getConsultingCategoryName(),
+                    ve.getClientAge(),
+                    ve.getClientGender(),
+                    summary
+                );
+            })
+            .toList();
     }
 
     /**
-     * G. 메일 프리뷰 최근 50개 조회 - 로컬 캐시 + 외부 메일 서비스
+     * G. 메일 프리뷰 최근 50개 조회 - 로컬 캐시
      */
     public List<MessagePreviewCache> getRecentMessages() {
-        // 로컬 캐시에서 먼저 조회
-        List<MessagePreviewCache> cachedMessages = messageRepo.findTop50ByOrderByCreatedAtDesc();
-        
-        // 캐시가 비어있거나 적으면 외부 메일 서비스에서 최신 데이터 가져오기
-        if (cachedMessages.isEmpty()) {
-            // 외부 메일 서비스에서 최신 로그 가져와서 캐시 업데이트 로직
-            // (현재는 캐시된 데이터만 반환)
-        }
-        
-        return cachedMessages;
+        return messageRepo.findTop50ByOrderByCreatedAtDesc();
     }
     
     /**
-     * H. 외부 서비스에서 집계 데이터 동기화 (스케줄러에서 호출)
+     * H. 메일 초안 생성 (외부 Mail Service 호출)
      */
-    @Transactional
-    public void syncAggregationData(String granularity, String startDate, String endDate) {
-        // 정규화 서비스에서 집계 데이터를 가져와서 로컬 캐시 테이블 업데이트
-        Map<String, Object> aggregationData = normalizationClient.getAggregationData(granularity, startDate, endDate);
-        
-        // TODO: aggregationData를 파싱해서 agg_* 테이블에 저장
-        // 실제 구현에서는 받은 데이터를 각 집계 테이블에 INSERT/UPDATE
+    public MailPreviewDto generateMailPreview(Long vocEventId) {
+        return mailClient.generateMailPreview(vocEventId);
     }
     
     /**
-     * I. 메일 발송 요청 - 외부 메일 서비스 호출
+     * I. 메일 발송 (외부 Mail Service 호출)
      */
-    public boolean sendMail(Long smallCategoryId, String assigneeEmail, String subject, String body) {
-        return mailClient.sendMail(smallCategoryId, assigneeEmail, subject, body);
-    }
-    
-    /**
-     * J. 메일 미리보기 생성 - 외부 메일 서비스 호출
-     */
-    public String generateMailPreview(Long smallCategoryId, String assigneeEmail) {
-        return mailClient.generateMailPreview(smallCategoryId, assigneeEmail);
+    public void sendMail(MailSendRequestDto request) {
+        mailClient.sendMail(request);
     }
 }

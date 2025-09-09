@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "assignee_map",
-       uniqueConstraints = @UniqueConstraint(columnNames = {"small_category_id"}))
+       uniqueConstraints = @UniqueConstraint(columnNames = {"consulting_category_id"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,8 +22,8 @@ public class AssigneeMap {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "small_category_id", nullable = false)
-    private DimSmallCategory smallCategory;
+    @JoinColumn(name = "consulting_category_id", nullable = false)  // small_category_id -> consulting_category_id
+    private DimSmallCategory consultingCategory;
 
     @Column(name = "assignee_email", length = 100)
     private String assigneeEmail;

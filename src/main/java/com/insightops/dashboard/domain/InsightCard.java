@@ -32,11 +32,11 @@ public class InsightCard {
     private String body;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "small_category_id")
-    private DimSmallCategory smallCategory;
+    @JoinColumn(name = "consulting_category_id")  // small_category_id -> consulting_category_id
+    private DimSmallCategory consultingCategory;
 
-    @Column(name = "age_band", length = 20)
-    private String ageBand;
+    @Column(name = "client_age", length = 20)  // age_band -> client_age
+    private String clientAge;
 
     @Column(name = "delta_percent")
     private Double deltaPercent;

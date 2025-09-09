@@ -31,7 +31,7 @@ public class NormalizationServiceClient {
     /**
      * 정규화된 VoC 케이스 목록을 외부 서비스에서 가져옴
      */
-    public List<CaseItem> getVocCases(Instant from, Instant to, Long smallCategoryId, int page, int size) {
+    public List<CaseItem> getVocEventsWithSummary(Instant from, Instant to, Long smallCategoryId, int page, int size) {
         try {
             String url = normalizationServiceUrl + "/api/voc-events/normalized" +
                 "?from=" + from.toString() +

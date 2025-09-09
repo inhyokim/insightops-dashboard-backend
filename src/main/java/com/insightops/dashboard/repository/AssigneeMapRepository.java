@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface AssigneeMapRepository extends JpaRepository<AssigneeMap, Long> {
     
-    Optional<AssigneeMap> findBySmallCategory_SmallCategoryId(Long smallCategoryId);
+    Optional<AssigneeMap> findByConsultingCategory_SmallCategoryId(Long consultingCategoryId);
 }
 
