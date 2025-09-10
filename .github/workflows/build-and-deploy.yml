@@ -71,6 +71,12 @@ jobs:
           publish-profile: ${{ secrets.AZURE_PUBLISH_PROFILE }}
           images: index.docker.io/${{ env.DOCKER_IMAGE }}:${{ steps.vars.outputs.TAG }}
 
+      - name: Wait for Azure Web App to start
+        run: |
+          echo "Waiting for Azure Web App to start..."
+          sleep 30
+          echo "Checking Azure Web App health..."
+
       - name: Post logout Docker Hub
         if: always()
         run: docker logout
