@@ -3,6 +3,7 @@ package com.insightops.dashboard.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.Instant;
 import java.util.Map;
@@ -26,6 +27,11 @@ public class HealthController {
             "message", "InsightOps Dashboard Backend API",
             "version", "1.0.0"
         ));
+    }
+    
+    @GetMapping("/")
+    public RedirectView redirectToTest() {
+        return new RedirectView("/test.html");
     }
 }
 
