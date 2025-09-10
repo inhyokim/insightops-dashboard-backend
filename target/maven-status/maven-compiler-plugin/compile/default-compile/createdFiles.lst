@@ -2,6 +2,7 @@ com/insightops/dashboard/repository/AggByCategoryAgeGenderRepository$SmallTrendR
 com/insightops/dashboard/repository/AggByCategoryAgeGenderRepository.class
 com/insightops/dashboard/repository/AggBySmallAgeGenderRepository$TopSmallRow.class
 com/insightops/dashboard/dto/SeriesPoint.class
+com/insightops/dashboard/controller/AdminController.class
 com/insightops/dashboard/client/MailServiceClient$1.class
 com/insightops/dashboard/client/VoicebotServiceClient.class
 com/insightops/dashboard/dto/MailPreviewDto.class
@@ -21,6 +22,7 @@ com/insightops/dashboard/repository/MessagePreviewCacheRepository.class
 com/insightops/dashboard/dto/CaseItem.class
 com/insightops/dashboard/client/VoicebotServiceClient$1.class
 com/insightops/dashboard/client/NormalizationServiceClient$1.class
+com/insightops/dashboard/scheduler/DataAggregationScheduler.class
 com/insightops/dashboard/client/VoicebotServiceClient$3.class
 com/insightops/dashboard/service/DashboardService.class
 com/insightops/dashboard/repository/InsightCardRepository.class
