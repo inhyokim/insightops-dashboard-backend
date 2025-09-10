@@ -16,6 +16,8 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/config/RestTemplateConfig.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/MailPreviewDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/service/VocDataService.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/TrendAnalysis.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/InsightRequest.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/InsightCardRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/AssigneeDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/DimSmallCategoryRepository.java
@@ -26,6 +28,7 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/VocListCache.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/TimeSeriesResponse.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/VoicebotServiceClient.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/service/AIInsightService.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/AggBySmallAgeGenderRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/NormalizationServiceClient.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/ShareItem.java
@@ -37,4 +40,6 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/AggTotalRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/DimSmallCategory.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/TimeSeriesItem.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/InsightResponse.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/controller/AIInsightController.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/MailServiceClient.java

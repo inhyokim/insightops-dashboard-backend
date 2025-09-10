@@ -52,7 +52,30 @@ management:
     health:
       show-details: always
 
+# AI 인사이트 서비스 설정
+openai:
+  api:
+    key: ${OPENAI_API_KEY:}
+  model: ${OPENAI_MODEL:gpt-4o-mini}
+  max-tokens: ${OPENAI_MAX_TOKENS:2000}
+  temperature: ${OPENAI_TEMPERATURE:0.7}
+  timeout: ${OPENAI_TIMEOUT:30000}
+
+# AI 인사이트 기능 설정
+ai-insights:
+  enabled: ${AI_INSIGHTS_ENABLED:true}
+  cache:
+    enabled: ${AI_CACHE_ENABLED:true}
+    ttl: ${AI_CACHE_TTL:3600} # 1시간
+  rate-limit:
+    enabled: ${AI_RATE_LIMIT_ENABLED:true}
+    requests-per-minute: ${AI_RATE_LIMIT_RPM:10}
+  fallback:
+    enabled: ${AI_FALLBACK_ENABLED:true}
+    use-statistical-analysis: ${AI_FALLBACK_STATISTICAL:true}
+
 logging:
   level:
     com.insightops.dashboard: DEBUG
     org.springframework.web: DEBUG
+    com.insightops.dashboard.service.AIInsightService: INFO
