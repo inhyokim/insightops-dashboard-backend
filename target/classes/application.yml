@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://insightops-admin.mysql.database.azure.com:3306/insightops_dashboard?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: insightopsadmin
-    password: Strongpassword@
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://insightops-admin.mysql.database.azure.com:3306/insightops_dashboard?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:insightopsadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:Strongpassword@}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       connection-timeout: 60000

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 인사이트 테스트 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 15px;
+            background: #fafafa;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .insight-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .insight-card h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .insight-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        .insight-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI 인사이트 테스트 페이지</h1>
+            <p>GPT 4o mini를 활용한 고급 VoC 트렌드 분석</p>
+        </div>
+        
+        <div class="content">
+            <!-- AI 서비스 상태 확인 -->
+            <div class="section">
+                <h2 class="section-title">🔍 AI 서비스 상태</h2>
+                <button class="btn" onclick="checkAIStatus()">서비스 상태 확인</button>
+                <div class="result" id="ai-status-result"></div>
+            </div>
+            
+            <!-- 트렌드 분석 -->
+            <div class="section">
+                <h2 class="section-title">📈 트렌드 분석</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>시작일</label>
+                        <input type="date" id="trend-start-date" value="2025-09-01">
+                    </div>
+                    <div class="form-group">
+                        <label>종료일</label>
+                        <input type="date" id="trend-end-date" value="2025-09-10">
+                    </div>
+                    <div class="form-group">
+                        <label>기간 단위</label>
+                        <select id="trend-period">
+                            <option value="daily">일별</option>
+                            <option value="weekly" selected>주별</option>
+                            <option value="monthly">월별</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>카테고리 (선택사항)</label>
+                        <input type="text" id="trend-categories" placeholder="상품문의,배송문의">
+                    </div>
+                    <div class="form-group">
+                        <label>연령대 (선택사항)</label>
+                        <input type="text" id="trend-age-groups" placeholder="20,30,40">
+                    </div>
+                    <div class="form-group">
+                        <label>성별 (선택사항)</label>
+                        <select id="trend-genders">
+                            <option value="">전체</option>
+                            <option value="남자">남자</option>
+                            <option value="여자">여자</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="generateTrendInsights()">트렌드 분석 생성</button>
+                <button class="btn btn-secondary" onclick="clearResult('trend-result')">결과 초기화</button>
+                <div class="result" id="trend-result"></div>
+            </div>
+            
+            <!-- 카테고리 분석 -->
+            <div class="section">
+                <h2 class="section-title">📊 카테고리 분석</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>시작일</label>
+                        <input type="date" id="category-start-date" value="2025-09-01">
+                    </div>
+                    <div class="form-group">
+                        <label>종료일</label>
+                        <input type="date" id="category-end-date" value="2025-09-10">
+                    </div>
+                    <div class="form-group">
+                        <label>기간 단위</label>
+                        <select id="category-period">
+                            <option value="daily">일별</option>
+                            <option value="weekly">주별</option>
+                            <option value="monthly" selected>월별</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>분석할 카테고리</label>
+                        <input type="text" id="category-categories" placeholder="상품문의,배송문의,결제문의">
+                    </div>
+                    <div class="form-group">
+                        <label>연령대 필터</label>
+                        <input type="text" id="category-age-groups" placeholder="20,30,40">
+                    </div>
+                    <div class="form-group">
+                        <label>성별 필터</label>
+                        <select id="category-genders">
+                            <option value="">전체</option>
+                            <option value="남자">남자</option>
+                            <option value="여자">여자</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="generateCategoryInsights()">카테고리 분석 생성</button>
+                <button class="btn btn-secondary" onclick="clearResult('category-result')">결과 초기화</button>
+                <div class="result" id="category-result"></div>
+            </div>
+            
+            <!-- 종합 분석 -->
+            <div class="section">
+                <h2 class="section-title">🎯 종합 분석</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>시작일</label>
+                        <input type="date" id="comprehensive-start-date" value="2025-09-01">
+                    </div>
+                    <div class="form-group">
+                        <label>종료일</label>
+                        <input type="date" id="comprehensive-end-date" value="2025-09-10">
+                    </div>
+                    <div class="form-group">
+                        <label>기간 단위</label>
+                        <select id="comprehensive-period">
+                            <option value="daily">일별</option>
+                            <option value="weekly" selected>주별</option>
+                            <option value="monthly">월별</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>분석 유형</label>
+                        <select id="comprehensive-type">
+                            <option value="comprehensive">종합 분석</option>
+                            <option value="trend">트렌드 분석</option>
+                            <option value="category">카테고리 분석</option>
+                            <option value="age">연령대 분석</option>
+                            <option value="gender">성별 분석</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>언어</label>
+                        <select id="comprehensive-language">
+                            <option value="ko" selected>한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>상세 수준</label>
+                        <select id="comprehensive-detail">
+                            <option value="basic">기본</option>
+                            <option value="detailed" selected>상세</option>
+                            <option value="comprehensive">종합</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>필터 조건 (JSON 형식)</label>
+                    <textarea id="comprehensive-filters" rows="4" placeholder='{"categories": ["상품문의", "배송문의"], "ageGroups": ["20", "30"], "genders": ["여자"]}'></textarea>
+                </div>
+                <button class="btn btn-success" onclick="generateComprehensiveInsights()">종합 분석 생성</button>
+                <button class="btn btn-secondary" onclick="clearResult('comprehensive-result')">결과 초기화</button>
+                <div class="result" id="comprehensive-result"></div>
+            </div>
+            
+            <!-- 로딩 인디케이터 -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI 인사이트를 생성하고 있습니다...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        // AI 서비스 상태 확인
+        async function checkAIStatus() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE}/api/ai-insights/status`);
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('ai-status-result');
+                resultDiv.innerHTML = `
+                    <div class="insight-card">
+                        <h3>🤖 AI 서비스 상태</h3>
+                        <div class="insight-item">
+                            <strong>서비스:</strong> ${data.service}
+                        </div>
+                        <div class="insight-item">
+                            <strong>상태:</strong> ${data.status} <span class="status ${data.status === 'active' ? 'success' : 'error'}">${data.status}</span>
+                        </div>
+                        <div class="insight-item">
+                            <strong>모델:</strong> ${data.model}
+                        </div>
+                        <div class="insight-item">
+                            <strong>지원 기능:</strong> ${data.features.join(', ')}
+                        </div>
+                        <div class="insight-item">
+                            <strong>확인 시간:</strong> ${new Date(data.timestamp).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('ai-status-result').innerHTML = `❌ 오류: ${error.message}`;
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 트렌드 분석 생성
+        async function generateTrendInsights() {
+            try {
+                showLoading();
+                const params = new URLSearchParams({
+                    startDate: document.getElementById('trend-start-date').value,
+                    endDate: document.getElementById('trend-end-date').value,
+                    period: document.getElementById('trend-period').value,
+                    language: 'ko',
+                    detailLevel: 'detailed'
+                });
+                
+                const categories = document.getElementById('trend-categories').value;
+                const ageGroups = document.getElementById('trend-age-groups').value;
+                const genders = document.getElementById('trend-genders').value;
+                
+                if (categories) params.append('categories', categories);
+                if (ageGroups) params.append('ageGroups', ageGroups);
+                if (genders) params.append('genders', genders);
+                
+                const response = await fetch(`${API_BASE}/api/ai-insights/trend?${params}`);
+                const data = await response.json();
+                
+                displayInsightResult('trend-result', data);
+            } catch (error) {
+                document.getElementById('trend-result').innerHTML = `❌ 오류: ${error.message}`;
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 카테고리 분석 생성
+        async function generateCategoryInsights() {
+            try {
+                showLoading();
+                const params = new URLSearchParams({
+                    startDate: document.getElementById('category-start-date').value,
+                    endDate: document.getElementById('category-end-date').value,
+                    period: document.getElementById('category-period').value,
+                    language: 'ko',
+                    detailLevel: 'detailed'
+                });
+                
+                const categories = document.getElementById('category-categories').value;
+                const ageGroups = document.getElementById('category-age-groups').value;
+                const genders = document.getElementById('category-genders').value;
+                
+                if (categories) params.append('categories', categories);
+                if (ageGroups) params.append('ageGroups', ageGroups);
+                if (genders) params.append('genders', genders);
+                
+                const response = await fetch(`${API_BASE}/api/ai-insights/category?${params}`);
+                const data = await response.json();
+                
+                displayInsightResult('category-result', data);
+            } catch (error) {
+                document.getElementById('category-result').innerHTML = `❌ 오류: ${error.message}`;
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 종합 분석 생성
+        async function generateComprehensiveInsights() {
+            try {
+                showLoading();
+                const requestData = {
+                    analysisType: document.getElementById('comprehensive-type').value,
+                    startDate: document.getElementById('comprehensive-start-date').value,
+                    endDate: document.getElementById('comprehensive-end-date').value,
+                    period: document.getElementById('comprehensive-period').value,
+                    language: document.getElementById('comprehensive-language').value,
+                    detailLevel: document.getElementById('comprehensive-detail').value
+                };
+                
+                const filtersText = document.getElementById('comprehensive-filters').value;
+                if (filtersText) {
+                    try {
+                        const filters = JSON.parse(filtersText);
+                        Object.assign(requestData, filters);
+                    } catch (e) {
+                        console.warn('필터 JSON 파싱 실패:', e);
+                    }
+                }
+                
+                const response = await fetch(`${API_BASE}/api/ai-insights/comprehensive`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                displayInsightResult('comprehensive-result', data);
+            } catch (error) {
+                document.getElementById('comprehensive-result').innerHTML = `❌ 오류: ${error.message}`;
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // 인사이트 결과 표시
+        function displayInsightResult(elementId, data) {
+            const resultDiv = document.getElementById(elementId);
+            
+            let html = `
+                <div class="insight-card">
+                    <h3>🤖 AI 인사이트 결과</h3>
+                    <div class="insight-item">
+                        <strong>분석 유형:</strong> ${data.analysisType}
+                    </div>
+                    <div class="insight-item">
+                        <strong>신뢰도:</strong> ${data.confidence} <span class="status ${getConfidenceClass(data.confidence)}">${data.confidence}</span>
+                    </div>
+                    <div class="insight-item">
+                        <strong>생성 시간:</strong> ${new Date(data.generatedAt).toLocaleString()}
+                    </div>
+                    <div class="insight-item">
+                        <strong>사용 모델:</strong> ${data.model}
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>📋 요약</h3>
+                    <p>${data.summary}</p>
+                </div>
+            `;
+            
+            if (data.keyFindings && data.keyFindings.length > 0) {
+                html += `
+                    <div class="card">
+                        <h3>🔍 주요 발견사항</h3>
+                        <ul>
+                            ${data.keyFindings.map(finding => `<li>${finding}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            if (data.recommendations && data.recommendations.length > 0) {
+                html += `
+                    <div class="card">
+                        <h3>💡 추천사항</h3>
+                        <ul>
+                            ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            if (data.trendAnalysis) {
+                html += `
+                    <div class="card">
+                        <h3>📈 트렌드 분석</h3>
+                        <pre>${JSON.stringify(data.trendAnalysis, null, 2)}</pre>
+                    </div>
+                `;
+            }
+            
+            if (data.statisticalData) {
+                html += `
+                    <div class="card">
+                        <h3>📊 통계 데이터</h3>
+                        <pre>${JSON.stringify(data.statisticalData, null, 2)}</pre>
+                    </div>
+                `;
+            }
+            
+            if (data.riskFactors && data.riskFactors.length > 0) {
+                html += `
+                    <div class="card">
+                        <h3>⚠️ 위험 요소</h3>
+                        <ul>
+                            ${data.riskFactors.map(risk => `<li>${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            if (data.opportunities && data.opportunities.length > 0) {
+                html += `
+                    <div class="card">
+                        <h3>🎯 기회 요소</h3>
+                        <ul>
+                            ${data.opportunities.map(opp => `<li>${opp}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // 신뢰도 클래스 반환
+        function getConfidenceClass(confidence) {
+            switch (confidence) {
+                case 'high': return 'success';
+                case 'medium': return 'warning';
+                case 'low': return 'error';
+                default: return 'warning';
+            }
+        }
+        
+        // 로딩 표시
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        
+        // 로딩 숨김
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // 결과 초기화
+        function clearResult(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+        
+        // 페이지 로드 시 AI 상태 확인
+        window.onload = function() {
+            checkAIStatus();
+        };
+    </script>
+</body>
+</html>

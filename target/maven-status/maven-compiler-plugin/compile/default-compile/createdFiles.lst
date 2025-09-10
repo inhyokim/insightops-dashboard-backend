@@ -1,3 +1,4 @@
+com/insightops/dashboard/config/DotenvConfig.class
 com/insightops/dashboard/repository/AggByCategoryAgeGenderRepository$SmallTrendRow.class
 com/insightops/dashboard/repository/AggByCategoryAgeGenderRepository.class
 com/insightops/dashboard/repository/AggBySmallAgeGenderRepository$TopSmallRow.class
