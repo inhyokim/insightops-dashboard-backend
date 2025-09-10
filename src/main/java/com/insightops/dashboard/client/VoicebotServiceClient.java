@@ -2,7 +2,10 @@ package com.insightops.dashboard.client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.RestClientException;
@@ -111,6 +114,37 @@ public class VoicebotServiceClient {
             return response.getBody() != null ? response.getBody() : Collections.emptyList();
         } catch (RestClientException e) {
             return Collections.emptyList();
+        }
+    }
+    
+    /**
+     * VoC 건수 요약 조회 (새로운 API)
+     */
+    public Map<String, Object> getVocCountSummary(Map<String, Object> request) {
+        try {
+            String url = voicebotServiceUrl + "/api/voc/count-summary";
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
+            
+            return restTemplate.postForObject(url, entity, Map.class);
+        } catch (RestClientException e) {
+            System.err.println("VoC count summary API 호출 실패: " + e.getMessage());
+            return Collections.emptyMap();
+        }
+    }
+    
+    /**
+     * Voicebot 서비스 Health Check
+     */
+    public Map<String, Object> healthCheck() {
+        try {
+            String url = voicebotServiceUrl + "/health";
+            return restTemplate.getForObject(url, Map.class);
+        } catch (RestClientException e) {
+            System.err.println("Voicebot 서비스 health check 실패: " + e.getMessage());
+            return Collections.emptyMap();
         }
     }
 }

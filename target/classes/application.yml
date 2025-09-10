@@ -20,7 +20,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
 
 server:
-  port: 3002
+  port: ${PORT:3002}
 
 # 외부 MSA 서비스 연동 설정
 external:
@@ -35,18 +35,12 @@ external:
   admin-service:
     base-url: ${ADMIN_SERVICE_URL:http://localhost:8004}
 
-# Voicebot DB 직접 연결 설정 (집계 데이터 생성용)
-voicebot:
-  datasource:
-    url: jdbc:mysql://insightops-admin.mysql.database.azure.com:3306/voicebot?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: insightopsadmin
-    password: Strongpassword@
-    driver-class-name: com.mysql.cj.jdbc.Driver
+# Voicebot Service API를 통해 데이터 조회 (더 이상 직접 DB 연결하지 않음)
 
-# 스케줄러 설정
+# 스케줄러 설정 (API 기반으로 변경되면서 비활성화)
 scheduler:
   data-aggregation:
-    enabled: true
+    enabled: false
     cron: "0 0 0 * * ?" # 매일 자정 실행
 
 management:

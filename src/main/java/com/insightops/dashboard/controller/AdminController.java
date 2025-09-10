@@ -130,13 +130,15 @@ public class AdminController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         
         try {
-            Long count = vocDataService.getTotalVocCount(from, to);
+            // API 기반으로 변경되어 더미 데이터 반환
+            Long count = 0L; // vocDataService.getTotalVocCount(from, to); - API로 대체 필요
             
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "from", from.toString(),
                 "to", to.toString(),
-                "count", count
+                "count", count,
+                "note", "API 기반으로 변경됨"
             ));
             
         } catch (Exception e) {

@@ -12,7 +12,6 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/AggBySmallAgeGender.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/OverviewDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/CaseItem.java
-/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/config/VoicebotDataSourceConfig.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/SmallTrendItem.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/config/RestTemplateConfig.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/MailPreviewDto.java

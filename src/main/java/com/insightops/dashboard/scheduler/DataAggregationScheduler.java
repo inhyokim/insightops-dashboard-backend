@@ -179,7 +179,9 @@ public class DataAggregationScheduler {
     }
 
     private void aggregateCategoryData(String granularity, LocalDate from, LocalDate to) {
-        List<Map<String, Object>> categoryData = vocDataService.getCategoryAggregation(granularity, from, to);
+        // TODO: API 기반으로 변경 후 수정 필요
+        // List<Map<String, Object>> categoryData = vocDataService.getCategoryAggregation(granularity, from, to);
+        List<Map<String, Object>> categoryData = List.of(); // 임시 비어있는 리스트
         
         for (Map<String, Object> row : categoryData) {
             AggByCategoryAgeGender agg = new AggByCategoryAgeGender();
@@ -205,7 +207,9 @@ public class DataAggregationScheduler {
         }
         
         // 새로운 데이터 조회 및 저장
-        List<Map<String, Object>> vocListData = vocDataService.getVocListForCache(from, to, 1000);
+        // TODO: API 기반으로 변경 후 수정 필요
+        // List<Map<String, Object>> vocListData = vocDataService.getVocListForCache(from, to, 1000);
+        List<Map<String, Object>> vocListData = List.of(); // 임시 비어있는 리스트
         
         for (Map<String, Object> row : vocListData) {
             VocListCache cache = new VocListCache();
