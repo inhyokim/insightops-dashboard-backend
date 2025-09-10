@@ -17,8 +17,6 @@ import java.time.Instant;
            @Index(name = "idx_cat_age_gender_bucket", columnList = "granularity,bucketStart"),
            @Index(name = "idx_cat_age_gender_filter", columnList = "consultingCategory,clientAge,clientGender")
        })
-@Getter
-@Setter  
 public class AggByCategoryAgeGender {
     
     @Id
@@ -52,4 +50,23 @@ public class AggByCategoryAgeGender {
     protected void onUpdate() {
         lastUpdated = Instant.now();
     }
+    
+    // Manual getters and setters (Lombok 대신)
+    public Long getId() { return id; }
+    public String getGranularity() { return granularity; }
+    public LocalDate getBucketStart() { return bucketStart; }
+    public String getConsultingCategory() { return consultingCategory; }
+    public String getClientAge() { return clientAge; }
+    public String getClientGender() { return clientGender; }
+    public Long getCount() { return count; }
+    public Instant getLastUpdated() { return lastUpdated; }
+    
+    public void setId(Long id) { this.id = id; }
+    public void setGranularity(String granularity) { this.granularity = granularity; }
+    public void setBucketStart(LocalDate bucketStart) { this.bucketStart = bucketStart; }
+    public void setConsultingCategory(String consultingCategory) { this.consultingCategory = consultingCategory; }
+    public void setClientAge(String clientAge) { this.clientAge = clientAge; }
+    public void setClientGender(String clientGender) { this.clientGender = clientGender; }
+    public void setCount(Long count) { this.count = count; }
+    public void setLastUpdated(Instant lastUpdated) { this.lastUpdated = lastUpdated; }
 }

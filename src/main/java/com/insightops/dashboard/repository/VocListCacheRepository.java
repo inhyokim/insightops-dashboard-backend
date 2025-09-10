@@ -52,4 +52,15 @@ public interface VocListCacheRepository extends JpaRepository<VocListCache, Stri
            "GROUP BY v.clientAge " +
            "ORDER BY COUNT(v) DESC")
     List<Object[]> getAgeStats(@Param("from") LocalDate from, @Param("to") LocalDate to);
+    
+    /**
+     * 날짜 범위로 조회 (카테고리 필터링 없음)
+     */
+    List<VocListCache> findByConsultingDateBetweenOrderByConsultingDateDesc(LocalDate from, LocalDate to);
+    
+    /**
+     * 날짜 범위 + 카테고리 필터링 조회
+     */
+    List<VocListCache> findByConsultingDateBetweenAndConsultingCategoryOrderByConsultingDateDesc(
+        LocalDate from, LocalDate to, String consultingCategory);
 }

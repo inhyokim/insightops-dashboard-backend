@@ -32,6 +32,22 @@ external:
     base-url: ${DATA_INGESTION_SERVICE_URL:http://localhost:8000}
   voicebot-service:
     base-url: ${VOICEBOT_SERVICE_URL:http://localhost:8002}
+  admin-service:
+    base-url: ${ADMIN_SERVICE_URL:http://localhost:8004}
+
+# Voicebot DB 직접 연결 설정 (집계 데이터 생성용)
+voicebot:
+  datasource:
+    url: jdbc:mysql://insightops-admin.mysql.database.azure.com:3306/voicebot?useSSL=true&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    username: insightopsadmin
+    password: Strongpassword@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+# 스케줄러 설정
+scheduler:
+  data-aggregation:
+    enabled: true
+    cron: "0 0 0 * * ?" # 매일 자정 실행
 
 management:
   endpoints:

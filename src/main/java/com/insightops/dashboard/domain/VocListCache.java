@@ -20,8 +20,6 @@ import java.time.Instant;
            @Index(name = "idx_voc_list_category", columnList = "consultingCategory"),
            @Index(name = "idx_voc_list_age_gender", columnList = "clientAge,clientGender")
        })
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class VocListCache {
@@ -63,4 +61,26 @@ public class VocListCache {
     protected void onUpdate() {
         updatedAt = Instant.now();
     }
+    
+    // Manual getters (Lombok 대신)
+    public String getVocId() { return vocId; }
+    public LocalDate getConsultingDate() { return consultingDate; }
+    public String getConsultingCategory() { return consultingCategory; }
+    public String getClientAge() { return clientAge; }
+    public String getClientGender() { return clientGender; }
+    public String getSourceSystem() { return sourceSystem; }
+    public String getSummaryText() { return summaryText; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getUpdatedAt() { return updatedAt; }
+    
+    // Manual setters (Lombok 대신)
+    public void setVocId(String vocId) { this.vocId = vocId; }
+    public void setConsultingDate(LocalDate consultingDate) { this.consultingDate = consultingDate; }
+    public void setConsultingCategory(String consultingCategory) { this.consultingCategory = consultingCategory; }
+    public void setClientAge(String clientAge) { this.clientAge = clientAge; }
+    public void setClientGender(String clientGender) { this.clientGender = clientGender; }
+    public void setSourceSystem(String sourceSystem) { this.sourceSystem = sourceSystem; }
+    public void setSummaryText(String summaryText) { this.summaryText = summaryText; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }

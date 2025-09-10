@@ -21,9 +21,8 @@ public class MessagePreviewCache {
     @Column(name = "message_id")
     private Long messageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consulting_category_id")  // small_category_id -> consulting_category_id
-    private DimSmallCategory consultingCategory;
+    @Column(name = "consulting_category", length = 100)
+    private String consultingCategory; // Small 카테고리명 (25개 중 하나)
 
     @Column(name = "to_email", length = 100)
     private String toEmail;
@@ -43,4 +42,3 @@ public class MessagePreviewCache {
         createdAt = Instant.now();
     }
 }
-

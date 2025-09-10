@@ -1,5 +1,6 @@
 package com.insightops.dashboard.service;
 
+import com.insightops.dashboard.client.AdminServiceClient;
 import com.insightops.dashboard.client.MailServiceClient;
 import com.insightops.dashboard.client.NormalizationServiceClient;
 import com.insightops.dashboard.client.VoicebotServiceClient;
@@ -7,6 +8,7 @@ import com.insightops.dashboard.domain.InsightCard;
 import com.insightops.dashboard.domain.MessagePreviewCache;
 import com.insightops.dashboard.dto.*;
 import com.insightops.dashboard.repository.*;
+import com.insightops.dashboard.service.VocDataService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +28,6 @@ public class DashboardService {
 
     // 로컬 집계/캐시 리포지토리
     private final AggTotalRepository aggTotalRepo;
-    private final AggByBigCategoryRepository aggBigRepo;
     private final AggByCategoryAgeGenderRepository aggCategoryRepo;
     private final InsightCardRepository insightRepo;
     private final MessagePreviewCacheRepository messageRepo;
@@ -36,18 +37,20 @@ public class DashboardService {
     private final VoicebotServiceClient voicebotClient;
     private final NormalizationServiceClient normalizationClient;
     private final MailServiceClient mailClient;
+    private final AdminServiceClient adminClient;
+    private final VocDataService vocDataService;
     
     public DashboardService(AggTotalRepository aggTotalRepo,
-                           AggByBigCategoryRepository aggBigRepo,
                            AggByCategoryAgeGenderRepository aggCategoryRepo,
                            InsightCardRepository insightRepo,
                            MessagePreviewCacheRepository messageRepo,
                            VocListCacheRepository vocListRepo,
                            VoicebotServiceClient voicebotClient,
                            NormalizationServiceClient normalizationClient,
-                           MailServiceClient mailClient) {
+                           MailServiceClient mailClient,
+                           AdminServiceClient adminClient,
+                           VocDataService vocDataService) {
         this.aggTotalRepo = aggTotalRepo;
-        this.aggBigRepo = aggBigRepo;
         this.aggCategoryRepo = aggCategoryRepo;
         this.insightRepo = insightRepo;
         this.messageRepo = messageRepo;
@@ -55,33 +58,87 @@ public class DashboardService {
         this.voicebotClient = voicebotClient;
         this.normalizationClient = normalizationClient;
         this.mailClient = mailClient;
+        this.adminClient = adminClient;
+        this.vocDataService = vocDataService;
     }
 
     /**
-     * A. 오버뷰 화면 데이터 조회 (로컬 집계 캐시 사용)
+     * A. 오버뷰 화면 데이터 조회 - period별 토글 지원 (daily/weekly/monthly)
      */
+    public OverviewDto getOverview(String period) {
+        // 기본값 설정
+        if (period == null || period.isEmpty()) {
+            period = "daily";
+        }
+        
+        try {
+            // 새로운 스키마에서 최신 집계 데이터 조회
+            var overviewData = aggTotalRepo.findLatestByPeriodType(period);
+            
+            if (overviewData.isPresent()) {
+                var data = overviewData.get();
+                
+                // Top 카테고리 조회 (기존 로직 유지 - 월별 기준)
+                LocalDate now = LocalDate.now();
+                LocalDate firstDay = now.withDayOfMonth(1);
+                var topSmall = aggCategoryRepo.findTopSmallOfMonth(firstDay);
+                String topCategory = topSmall.map(row -> row.getSmallName()).orElse("정보 없음");
+                double topRatio = topSmall.map(row ->
+                    row.getTotalCnt() == 0 ? 0.0 : (double)row.getCnt() / row.getTotalCnt() * 100.0
+                ).orElse(0.0);
+                
+                return new OverviewDto(
+                    data.getTotalCount(), 
+                    data.getPrevCount(), 
+                    data.getDeltaPercent(), 
+                    topCategory, 
+                    topRatio
+                );
+            } else {
+                // 집계 데이터가 없는 경우 실시간 계산
+                LocalDate today = LocalDate.now();
+                LocalDate yesterday = today.minusDays(1);
+                
+                Long currentCount = 0L;
+                Long prevCount = 0L;
+                
+                // Period별 실시간 계산
+                switch (period.toLowerCase()) {
+                    case "daily":
+                        currentCount = vocDataService.getDailyVocCount(yesterday);
+                        prevCount = vocDataService.getDailyVocCount(yesterday.minusDays(1));
+                        break;
+                    case "weekly":
+                        currentCount = vocDataService.getWeeklyVocCount(yesterday);
+                        prevCount = vocDataService.getWeeklyVocCount(yesterday.minusDays(7));
+                        break;
+                    case "monthly":
+                        currentCount = vocDataService.getMonthlyVocCount(yesterday);
+                        prevCount = vocDataService.getMonthlyVocCount(yesterday.minusDays(30));
+                        break;
+                    default:
+                        currentCount = vocDataService.getDailyVocCount(yesterday);
+                        prevCount = vocDataService.getDailyVocCount(yesterday.minusDays(1));
+                }
+                
+                // 증감률 계산
+                double deltaPercent = prevCount == 0 ? 0.0 : ((double)(currentCount - prevCount) / prevCount) * 100.0;
+                
+                return new OverviewDto(currentCount, prevCount, deltaPercent, "정보 없음", 0.0);
+            }
+        } catch (Exception e) {
+            System.err.println("오버뷰 데이터 조회 중 오류: " + e.getMessage());
+            // 오류 발생 시 기본값 반환
+            return new OverviewDto(0L, 0L, 0.0, "정보 없음", 0.0);
+        }
+    }
+    
+    /**
+     * A. 오버뷰 화면 데이터 조회 (기존 호환성을 위한 deprecated 메서드)
+     */
+    @Deprecated
     public OverviewDto getOverview(YearMonth yearMonth) {
-        LocalDate firstDay = yearMonth.atDay(1);
-        LocalDate lastDay = yearMonth.atEndOfMonth();
-        LocalDate prevFirstDay = yearMonth.minusMonths(1).atDay(1);
-        LocalDate prevLastDay = yearMonth.minusMonths(1).atEndOfMonth();
-        
-        // 이달 총 VoC 건수 (agg_total에서 조회)
-        long thisCnt = aggTotalRepo.findTotalCountBetween(firstDay, lastDay).orElse(0L);
-        // 지난달 총 VoC 건수
-        long prevCnt = aggTotalRepo.findTotalCountBetween(prevFirstDay, prevLastDay).orElse(0L);
-        
-        // 증감률 계산
-        double delta = prevCnt == 0 ? 0.0 : ((double)(thisCnt - prevCnt) / prevCnt) * 100.0;
-        
-        // Top 카테고리 조회 (agg_by_category_age_gender에서)
-        var topSmall = aggCategoryRepo.findTopSmallOfMonth(firstDay);
-        String topCategory = topSmall.map(row -> row.getSmallName()).orElse("정보 없음");
-        double topRatio = topSmall.map(row -> 
-            row.getTotalCnt() == 0 ? 0.0 : (double)row.getCnt() / row.getTotalCnt() * 100.0
-        ).orElse(0.0);
-
-        return new OverviewDto(thisCnt, prevCnt, delta, topCategory, topRatio);
+        return getOverview("monthly");
     }
 
     /**
@@ -117,13 +174,11 @@ public class DashboardService {
      * C. 전체 VoC 변화량 시계열 데이터 조회 (라인차트용) - 로컬 집계 캐시
      */
     public List<SeriesPoint> getTotalSeries(String granularity, LocalDate from, LocalDate to) {
-        // 임시 더미 데이터
-        return List.of(
-            new SeriesPoint(LocalDate.of(2024, 1, 1), 100L),
-            new SeriesPoint(LocalDate.of(2024, 1, 2), 120L),
-            new SeriesPoint(LocalDate.of(2024, 1, 3), 110L),
-            new SeriesPoint(LocalDate.of(2024, 1, 4), 150L)
-        );
+        var points = aggTotalRepo.findSeries(granularity, from, to);
+        
+        return points.stream()
+            .map(point -> new SeriesPoint(point.getBucketStart(), point.getTotalCount()))
+            .toList();
     }
 
     /**
@@ -146,15 +201,44 @@ public class DashboardService {
     }
 
     /**
-     * F. 상담 사례 목록 조회 - 임시 더미 데이터
+     * F. 상담 사례 목록 조회 - VocListCache에서 조회
      */
     public List<CaseItem> getCases(LocalDate from, LocalDate to, String consultingCategory, int page, int size) {
-        // 임시 더미 데이터
-        return List.of(
-            new CaseItem(1L, "src-001", "2024-01-15", "조회/안내", "도난/분실 신청", "20대", "여성", "카드 분실 신고 접수"),
-            new CaseItem(2L, "src-002", "2024-01-15", "즉시처리", "이용내역 안내", "30대", "남성", "최근 결제 내역 문의"),
-            new CaseItem(3L, "src-003", "2024-01-14", "변경/등록요청", "한도 안내", "40대", "여성", "한도 상향 요청")
-        );
+        // VocListCache에서 필터링하여 조회
+        List<com.insightops.dashboard.domain.VocListCache> vocList;
+        
+        if (consultingCategory != null && !consultingCategory.trim().isEmpty()) {
+            // 카테고리 필터링 적용
+            vocList = vocListRepo.findByConsultingDateBetweenAndConsultingCategoryOrderByConsultingDateDesc(
+                from, to, consultingCategory);
+        } else {
+            // 전체 조회
+            vocList = vocListRepo.findByConsultingDateBetweenOrderByConsultingDateDesc(from, to);
+        }
+        
+        // 페이징 처리 (간단한 방식)
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, vocList.size());
+        
+        if (startIndex >= vocList.size()) {
+            return List.of(); // 빈 리스트 반환
+        }
+        
+        List<com.insightops.dashboard.domain.VocListCache> pagedList = vocList.subList(startIndex, endIndex);
+        
+        // VocListCache를 CaseItem으로 변환
+        return pagedList.stream()
+            .map(voc -> new CaseItem(
+                voc.getVocId().hashCode() % 10000L, // 임시 ID (실제로는 sequence나 별도 ID 사용)
+                voc.getSourceSystem(),
+                voc.getConsultingDate().toString(),
+                mapSmallToBigCategory(voc.getConsultingCategory()), // Big Category 매핑
+                voc.getConsultingCategory(), // Small Category
+                voc.getClientAge(),
+                voc.getClientGender(),
+                voc.getSummaryText()
+            ))
+            .toList();
     }
 
     /**

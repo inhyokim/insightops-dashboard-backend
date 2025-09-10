@@ -27,24 +27,34 @@ public class DashboardController {
     }
 
     /**
-     * 1. 오버뷰 (이달 VoC 건수, 증감률, Top 카테고리)
-     * GET /api/dashboard/overview?year=2024&month=4
+     * 1. 오버뷰 (토글: daily/weekly/monthly)
+     * GET /api/dashboard/overview?period=daily
      */
     @GetMapping("/overview")
     public ResponseEntity<OverviewDto> getOverview(
-            @RequestParam int year,
-            @RequestParam int month) {
-        YearMonth yearMonth = YearMonth.of(year, month);
+            @RequestParam(defaultValue = "daily") String period) {
+        OverviewDto overview = dashboardService.getOverview(period);
+        return ResponseEntity.ok(overview);
+    }
+    
+    /**
+     * 1-1. 오버뷰 (기존 호환성용 - deprecated)
+     * GET /api/dashboard/overview-legacy?yearMonth=2024-01
+     */
+    @Deprecated
+    @GetMapping("/overview-legacy")
+    public ResponseEntity<OverviewDto> getOverviewLegacy(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth yearMonth) {
         OverviewDto overview = dashboardService.getOverview(yearMonth);
         return ResponseEntity.ok(overview);
     }
 
     /**
      * 2. Big 카테고리 비중 (파이차트)
-     * GET /api/dashboard/category-share?granularity=month&from=2024-01-01&to=2024-01-31
+     * GET /api/dashboard/big-category-share?granularity=month&from=2024-01-01&to=2024-01-31
      */
-    @GetMapping("/category-share")
-    public ResponseEntity<List<ShareItem>> getCategoryShare(
+    @GetMapping("/big-category-share")
+    public ResponseEntity<List<ShareItem>> getBigCategoryShare(
             @RequestParam String granularity,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
@@ -54,10 +64,10 @@ public class DashboardController {
 
     /**
      * 3. 전체 VoC 변화량 (라인차트)
-     * GET /api/dashboard/voc-series?granularity=month&from=2024-01-01&to=2024-01-31
+     * GET /api/dashboard/total-series?granularity=month&from=2024-01-01&to=2024-01-31
      */
-    @GetMapping("/voc-series")
-    public ResponseEntity<List<SeriesPoint>> getVocSeries(
+    @GetMapping("/total-series")
+    public ResponseEntity<List<SeriesPoint>> getTotalSeries(
             @RequestParam String granularity,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
@@ -108,9 +118,9 @@ public class DashboardController {
 
     /**
      * 7. 메일 프리뷰 최근 50개 조회
-     * GET /api/dashboard/messages/recent
+     * GET /api/dashboard/mail/recent
      */
-    @GetMapping("/messages/recent")
+    @GetMapping("/mail/recent")
     public ResponseEntity<List<MessagePreviewCache>> getRecentMessages() {
         List<MessagePreviewCache> messages = dashboardService.getRecentMessages();
         return ResponseEntity.ok(messages);
@@ -118,11 +128,11 @@ public class DashboardController {
 
     /**
      * 8. 메일 초안 생성 (외부 Mail Service 호출)
-     * POST /api/dashboard/mail/preview?vocEventId=1
+     * POST /api/dashboard/mail/preview
      */
     @PostMapping("/mail/preview")
-    public ResponseEntity<MailPreviewDto> generateMailPreview(@RequestParam String vocEventId) {
-        MailPreviewDto preview = dashboardService.generateMailPreview(vocEventId);
+    public ResponseEntity<MailPreviewDto> generateMailPreview(@RequestBody MailGenerationRequestDto request) {
+        MailPreviewDto preview = dashboardService.generateMailPreview(request.getVocId());
         return ResponseEntity.ok(preview);
     }
 
