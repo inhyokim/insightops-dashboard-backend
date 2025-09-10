@@ -20,7 +20,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
 
 server:
-  port: 3002
+  port: ${PORT:3002}
 
 # 외부 MSA 서비스 연동 설정
 external:
