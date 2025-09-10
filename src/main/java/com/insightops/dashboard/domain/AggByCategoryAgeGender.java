@@ -19,7 +19,7 @@ import java.time.Instant;
        })
 @Getter
 @Setter  
-public class AggBySmallAgeGender {
+public class AggByCategoryAgeGender {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "insight_card")
@@ -31,18 +32,33 @@ public class InsightCard {
     @Column(name = "body")
     private String body;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "consulting_category_id")  // small_category_id -> consulting_category_id
-    private DimSmallCategory consultingCategory;
+    // 직접 문자열로 저장 (외부 카테고리 참조 제거)
+    @Column(name = "consulting_category", length = 100)
+    private String consultingCategory; // 25개 카테고리 중 하나
 
-    @Column(name = "client_age", length = 20)  // age_band -> client_age
+    @Column(name = "client_age", length = 20)
     private String clientAge;
 
     @Column(name = "delta_percent")
-    private Double deltaPercent;
+    private Double deltaPercent; // 변동률 (%)
 
     @Column(name = "score")
-    private Double score;
+    private Double score; // AI 신뢰도 점수 (0-100)
+
+    @Column(name = "insight_type", length = 50)
+    private String insightType; // "급증", "급감", "신규트렌드", "계절성" 등
+
+    @Column(name = "period_start")
+    private LocalDate periodStart; // 분석 기간 시작
+
+    @Column(name = "period_end")
+    private LocalDate periodEnd; // 분석 기간 끝
+
+    @Column(name = "previous_count")
+    private Long previousCount; // 이전 기간 건수
+
+    @Column(name = "current_count")  
+    private Long currentCount; // 현재 기간 건수
 
     @PrePersist
     protected void onCreate() {

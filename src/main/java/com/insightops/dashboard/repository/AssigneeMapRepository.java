@@ -11,4 +11,3 @@ public interface AssigneeMapRepository extends JpaRepository<AssigneeMap, Long> 
     
     Optional<AssigneeMap> findByConsultingCategory_SmallCategoryId(Long consultingCategoryId);
 }
-

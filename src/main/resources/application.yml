@@ -30,6 +30,8 @@ external:
     base-url: ${MAIL_SERVICE_URL:http://localhost:8003}
   data-ingestion-service:
     base-url: ${DATA_INGESTION_SERVICE_URL:http://localhost:8000}
+  voicebot-service:
+    base-url: ${VOICEBOT_SERVICE_URL:http://localhost:8002}
 
 management:
   endpoints:

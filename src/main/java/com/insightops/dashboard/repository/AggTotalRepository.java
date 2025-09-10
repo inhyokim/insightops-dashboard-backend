@@ -34,4 +34,11 @@ public interface AggTotalRepository extends JpaRepository<AggTotal, Long> {
         WHERE granularity='month' AND bucket_start = :month
         """, nativeQuery = true)
     Optional<Long> findMonthlyTotal(@Param("month") LocalDate month);
+    
+    @Query(value = """
+        SELECT SUM(total_count) 
+        FROM agg_total 
+        WHERE granularity='day' AND bucket_start BETWEEN :from AND :to
+        """, nativeQuery = true)
+    Optional<Long> findTotalCountBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 }

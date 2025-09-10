@@ -93,16 +93,16 @@ public class DashboardController {
 
     /**
      * 6. 상담 사례 목록 + 요약 조회 (로컬 데이터)
-     * GET /api/dashboard/cases?from=2024-01-01&to=2024-01-31&consultingCategoryId=1&page=0&size=20
+     * GET /api/dashboard/cases?from=2024-01-01&to=2024-01-31&consultingCategory=1&page=0&size=20
      */
     @GetMapping("/cases")
     public ResponseEntity<List<CaseItem>> getCases(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(required = false) Long consultingCategoryId,
+            @RequestParam(required = false) String consultingCategory,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        List<CaseItem> cases = dashboardService.getCases(from, to, consultingCategoryId, page, size);
+        List<CaseItem> cases = dashboardService.getCases(from, to, consultingCategory, page, size);
         return ResponseEntity.ok(cases);
     }
 
@@ -121,7 +121,7 @@ public class DashboardController {
      * POST /api/dashboard/mail/preview?vocEventId=1
      */
     @PostMapping("/mail/preview")
-    public ResponseEntity<MailPreviewDto> generateMailPreview(@RequestParam Long vocEventId) {
+    public ResponseEntity<MailPreviewDto> generateMailPreview(@RequestParam String vocEventId) {
         MailPreviewDto preview = dashboardService.generateMailPreview(vocEventId);
         return ResponseEntity.ok(preview);
     }
