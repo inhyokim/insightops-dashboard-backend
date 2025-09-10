@@ -145,4 +145,14 @@ public class DashboardController {
         dashboardService.sendMail(request);
         return ResponseEntity.ok().build();
     }
+    
+    /**
+     * 10. VoC 상세보기 (Normalization Service API 호출)
+     * GET /api/dashboard/voc-detail/{vocEventId}
+     */
+    @GetMapping("/voc-detail/{vocEventId}")
+    public ResponseEntity<Map<String, String>> getVocDetail(@PathVariable Long vocEventId) {
+        String analysisResult = dashboardService.getVocAnalysisResult(vocEventId);
+        return ResponseEntity.ok(Map.of("analysis_result", analysisResult));
+    }
 }

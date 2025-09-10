@@ -279,6 +279,20 @@
                 <div class="result" id="cases-result"></div>
             </div>
 
+            <!-- G. VoC 상세보기 -->
+            <div class="api-section">
+                <div class="api-title">🔍 G. VoC 상세보기</div>
+                <div class="api-description">특정 VoC 이벤트의 분석 결과 조회</div>
+                <div class="endpoint">GET /api/dashboard/voc-detail/{vocEventId}</div>
+                <div class="params">
+                    <label>VoC 이벤트 ID:</label>
+                    <input type="number" id="voc-detail-id" value="1" min="1">
+                </div>
+                <button onclick="callVocDetail()">🔍 조회</button>
+                <button class="clear-btn" onclick="clearResult('voc-detail-result')">🗑️ 초기화</button>
+                <div class="result" id="voc-detail-result"></div>
+            </div>
+
             <!-- G. 메일 프리뷰 -->
             <div class="api-section">
                 <div class="api-title">📧 G. 메일 프리뷰</div>
@@ -568,6 +582,20 @@
             const url = `${API_BASE}/api/admin/aggregate?from=${from}&to=${to}`;
             const result = await callAPI(url, { method: 'POST' });
             displayResult('manual-agg-result', result);
+        }
+
+        // G. VoC 상세보기 API 호출
+        async function callVocDetail() {
+            const vocEventId = document.getElementById('voc-detail-id').value;
+            
+            if (!vocEventId) {
+                alert('VoC 이벤트 ID를 입력해주세요.');
+                return;
+            }
+            
+            const url = `${API_BASE}/api/dashboard/voc-detail/${vocEventId}`;
+            const result = await callAPI(url);
+            displayResult('voc-detail-result', result);
         }
 
         // 페이지 로드 시 기본값 설정

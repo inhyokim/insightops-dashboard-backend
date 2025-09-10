@@ -142,32 +142,40 @@ public class DashboardService {
     }
 
     /**
-     * B. Big 카테고리 비중 데이터 조회 (파이차트용) - 로컬 집계 캐시
+     * B. Big 카테고리 비중 데이터 조회 (파이차트용) - Normalization API 기반
      */
     public List<ShareItem> getBigCategoryShare(String granularity, LocalDate from, LocalDate to) {
-        // agg_by_category_age_gender에서 consulting_category별 집계를 조회
-        var categoryTrends = aggCategoryRepo.findSmallTrends(granularity, from, to, null, null, 100);
-        
-        // Small Category를 Big Category로 그룹핑하여 집계
-        Map<String, Long> bigCategoryMap = categoryTrends.stream()
-            .collect(Collectors.groupingBy(
-                row -> mapSmallToBigCategory(row.getSmallName()),
-                Collectors.summingLong(AggByCategoryAgeGenderRepository.SmallTrendRow::getCnt)
-            ));
-        
-        // 총 건수 계산
-        long totalCount = bigCategoryMap.values().stream().mapToLong(Long::longValue).sum();
-        
-        // ShareItem으로 변환하여 비중 계산
-        return bigCategoryMap.entrySet().stream()
-            .map(entry -> {
-                String bigCategory = entry.getKey();
-                Long count = entry.getValue();
-                double ratio = totalCount == 0 ? 0.0 : (double) count / totalCount * 100.0;
-                return new ShareItem(bigCategory, count, Math.round(ratio * 10) / 10.0);
-            })
-            .sorted((a, b) -> Long.compare(b.count(), a.count())) // 건수 내림차순 정렬
-            .toList();
+        try {
+            // Normalization Service에서 voc_normalized 데이터 조회
+            List<CaseItem> vocList = normalizationClient.getVocEventsWithSummary(
+                from.atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                to.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                null, 1, 10000);
+            
+            // Small Category를 Big Category로 그룹핑하여 집계
+            Map<String, Long> bigCategoryMap = vocList.stream()
+                .collect(Collectors.groupingBy(
+                    voc -> mapSmallToBigCategory(voc.consultingCategoryName()),
+                    Collectors.counting()
+                ));
+            
+            // 총 건수 계산
+            long totalCount = bigCategoryMap.values().stream().mapToLong(Long::longValue).sum();
+            
+            // ShareItem으로 변환하여 비중 계산
+            return bigCategoryMap.entrySet().stream()
+                .map(entry -> {
+                    String bigCategory = entry.getKey();
+                    Long count = entry.getValue();
+                    double ratio = totalCount == 0 ? 0.0 : (double) count / totalCount * 100.0;
+                    return new ShareItem(bigCategory, count, Math.round(ratio * 10) / 10.0);
+                })
+                .sorted((a, b) -> Long.compare(b.count(), a.count())) // 건수 내림차순 정렬
+                .toList();
+        } catch (Exception e) {
+            System.err.println("빅카테고리 비중 데이터 조회 오류: " + e.getMessage());
+            return List.of(); // 오류 시 빈 리스트 반환
+        }
     }
 
     /**
@@ -260,6 +268,13 @@ public class DashboardService {
      */
     public void sendMail(MailSendRequestDto request) {
         mailClient.sendMail(request);
+    }
+    
+    /**
+     * J. VoC 상세보기 - 분석 결과 조회 (Normalization Service API 호출)
+     */
+    public String getVocAnalysisResult(Long vocEventId) {
+        return normalizationClient.getVocAnalysisResult(vocEventId);
     }
     
     /**

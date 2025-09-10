@@ -30,10 +30,13 @@ public class NormalizationServiceClient {
     
     /**
      * 정규화된 VoC 케이스 목록을 외부 서비스에서 가져옴
+     * client_gender: "여자", "남자"
+     * client_age: "20", "30", "40" (s 제거)
+     * analysis_result: summary 대신 analysis_result 필드 사용
      */
     public List<CaseItem> getVocEventsWithSummary(Instant from, Instant to, Long smallCategoryId, int page, int size) {
         try {
-            String url = normalizationServiceUrl + "/api/voc-events/normalized" +
+            String url = normalizationServiceUrl + "/api/normalized/voc-list" +
                 "?from=" + from.toString() +
                 "&to=" + to.toString() +
                 "&page=" + page +
@@ -59,23 +62,29 @@ public class NormalizationServiceClient {
     }
     
     /**
-     * 특정 VoC 이벤트의 요약 정보를 가져옴
+     * 특정 VoC 이벤트의 분석 결과를 가져옴 (summary 대신 analysis_result)
      */
-    public String getVocSummary(Long vocEventId) {
+    public String getVocAnalysisResult(Long vocEventId) {
         try {
-            String url = normalizationServiceUrl + "/api/voc-events/" + vocEventId + "/summary";
-            return restTemplate.getForObject(url, String.class);
+            String url = normalizationServiceUrl + "/api/normalized/voc-detail/" + vocEventId;
+            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            
+            if (response != null && response.get("analysis_result") != null) {
+                return response.get("analysis_result").toString();
+            }
+            return "분석 결과를 가져올 수 없습니다.";
         } catch (RestClientException e) {
-            return "요약 정보를 가져올 수 없습니다.";
+            return "분석 결과를 가져올 수 없습니다.";
         }
     }
     
     /**
      * 정규화 서비스에서 집계 데이터를 가져와 로컬 캐시 업데이트
+     * (Big Category 파이차트용 - voc_normalized 테이블에서 데이터 조회)
      */
     public Map<String, Object> getAggregationData(String granularity, String startDate, String endDate) {
         try {
-            String url = normalizationServiceUrl + "/api/aggregations" +
+            String url = normalizationServiceUrl + "/api/normalized/aggregations" +
                 "?granularity=" + granularity +
                 "&startDate=" + startDate +
                 "&endDate=" + endDate;
