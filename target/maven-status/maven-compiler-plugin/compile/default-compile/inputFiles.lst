@@ -21,8 +21,10 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/DimSmallCategoryRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/controller/AdminController.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/controller/DashboardController.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/FilterRequest.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/AggTotal.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/VocListCache.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/TimeSeriesResponse.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/VoicebotServiceClient.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/AggBySmallAgeGenderRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/NormalizationServiceClient.java
@@ -34,4 +36,5 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/SeriesPoint.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/AggTotalRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/DimSmallCategory.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/TimeSeriesItem.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/client/MailServiceClient.java

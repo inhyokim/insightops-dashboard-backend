@@ -367,6 +367,234 @@ public class DashboardService {
     }
     
     /**
+     * O. 시계열 데이터 조회 (필터링 지원)
+     */
+    public TimeSeriesResponse getTimeSeriesData(FilterRequest filter) {
+        try {
+            return vocDataService.getTimeSeriesData(filter);
+        } catch (Exception e) {
+            logger.error("시계열 데이터 조회 실패: {}", e.getMessage());
+            return getTimeSeriesDataDefault(filter);
+        }
+    }
+    
+    /**
+     * P. 카테고리별 시계열 데이터 조회
+     */
+    public Map<String, TimeSeriesResponse> getCategoryTimeSeriesData(FilterRequest filter) {
+        try {
+            return vocDataService.getCategoryTimeSeriesData(filter);
+        } catch (Exception e) {
+            logger.error("카테고리별 시계열 데이터 조회 실패: {}", e.getMessage());
+            return getCategoryTimeSeriesDataDefault(filter);
+        }
+    }
+    
+    /**
+     * Q. 연령대별 시계열 데이터 조회
+     */
+    public Map<String, TimeSeriesResponse> getAgeGroupTimeSeriesData(FilterRequest filter) {
+        try {
+            return vocDataService.getAgeGroupTimeSeriesData(filter);
+        } catch (Exception e) {
+            logger.error("연령대별 시계열 데이터 조회 실패: {}", e.getMessage());
+            return getAgeGroupTimeSeriesDataDefault(filter);
+        }
+    }
+    
+    /**
+     * R. 성별 시계열 데이터 조회
+     */
+    public Map<String, TimeSeriesResponse> getGenderTimeSeriesData(FilterRequest filter) {
+        try {
+            return vocDataService.getGenderTimeSeriesData(filter);
+        } catch (Exception e) {
+            logger.error("성별 시계열 데이터 조회 실패: {}", e.getMessage());
+            return getGenderTimeSeriesDataDefault(filter);
+        }
+    }
+    
+    /**
+     * S. Small Category 트렌드 분석 (필터링 + 시계열)
+     */
+    public Map<String, Object> getSmallCategoryTrend(FilterRequest filter) {
+        try {
+            // 시계열 데이터 조회
+            TimeSeriesResponse timeSeriesData = getTimeSeriesData(filter);
+            
+            // 트렌드 분석
+            Map<String, Object> trendAnalysis = analyzeTrend(timeSeriesData.data());
+            
+            // 결과 구성
+            Map<String, Object> result = new HashMap<>();
+            result.put("timeSeriesData", timeSeriesData);
+            result.put("trendAnalysis", trendAnalysis);
+            result.put("filter", filter);
+            result.put("summary", generateTrendSummary(trendAnalysis));
+            
+            return result;
+            
+        } catch (Exception e) {
+            logger.error("Small Category 트렌드 분석 실패: {}", e.getMessage());
+            return getSmallCategoryTrendDefault(filter);
+        }
+    }
+    
+    // ========== Fallback 메서드들 ==========
+    
+    /**
+     * 시계열 데이터 캐시에서 조회
+     */
+    private TimeSeriesResponse getTimeSeriesDataFromCache(FilterRequest filter) {
+        // TODO: 캐시에서 데이터 조회 로직 구현
+        logger.warn("시계열 데이터 캐시 조회 - 구현 필요");
+        return getTimeSeriesDataDefault(filter);
+    }
+    
+    /**
+     * 시계열 데이터 기본값 반환
+     */
+    private TimeSeriesResponse getTimeSeriesDataDefault(FilterRequest filter) {
+        List<TimeSeriesItem> emptyData = List.of();
+        return new TimeSeriesResponse(emptyData, filter, filter.period());
+    }
+    
+    /**
+     * 카테고리별 시계열 데이터 캐시에서 조회
+     */
+    private Map<String, TimeSeriesResponse> getCategoryTimeSeriesDataFromCache(FilterRequest filter) {
+        logger.warn("카테고리별 시계열 데이터 캐시 조회 - 구현 필요");
+        return getCategoryTimeSeriesDataDefault(filter);
+    }
+    
+    /**
+     * 카테고리별 시계열 데이터 기본값 반환
+     */
+    private Map<String, TimeSeriesResponse> getCategoryTimeSeriesDataDefault(FilterRequest filter) {
+        Map<String, TimeSeriesResponse> defaultData = new HashMap<>();
+        List<String> categories = filter.hasCategoryFilter() ? filter.categories() : List.of("전체");
+        
+        for (String category : categories) {
+            defaultData.put(category, getTimeSeriesDataDefault(filter));
+        }
+        
+        return defaultData;
+    }
+    
+    /**
+     * 연령대별 시계열 데이터 캐시에서 조회
+     */
+    private Map<String, TimeSeriesResponse> getAgeGroupTimeSeriesDataFromCache(FilterRequest filter) {
+        logger.warn("연령대별 시계열 데이터 캐시 조회 - 구현 필요");
+        return getAgeGroupTimeSeriesDataDefault(filter);
+    }
+    
+    /**
+     * 연령대별 시계열 데이터 기본값 반환
+     */
+    private Map<String, TimeSeriesResponse> getAgeGroupTimeSeriesDataDefault(FilterRequest filter) {
+        Map<String, TimeSeriesResponse> defaultData = new HashMap<>();
+        List<String> ageGroups = filter.hasAgeGroupFilter() ? filter.ageGroups() : List.of("20", "30", "40");
+        
+        for (String ageGroup : ageGroups) {
+            defaultData.put(ageGroup, getTimeSeriesDataDefault(filter));
+        }
+        
+        return defaultData;
+    }
+    
+    /**
+     * 성별 시계열 데이터 캐시에서 조회
+     */
+    private Map<String, TimeSeriesResponse> getGenderTimeSeriesDataFromCache(FilterRequest filter) {
+        logger.warn("성별 시계열 데이터 캐시 조회 - 구현 필요");
+        return getGenderTimeSeriesDataDefault(filter);
+    }
+    
+    /**
+     * 성별 시계열 데이터 기본값 반환
+     */
+    private Map<String, TimeSeriesResponse> getGenderTimeSeriesDataDefault(FilterRequest filter) {
+        Map<String, TimeSeriesResponse> defaultData = new HashMap<>();
+        List<String> genders = filter.hasGenderFilter() ? filter.genders() : List.of("남자", "여자");
+        
+        for (String gender : genders) {
+            defaultData.put(gender, getTimeSeriesDataDefault(filter));
+        }
+        
+        return defaultData;
+    }
+    
+    /**
+     * Small Category 트렌드 분석 기본값 반환
+     */
+    private Map<String, Object> getSmallCategoryTrendDefault(FilterRequest filter) {
+        Map<String, Object> defaultResult = new HashMap<>();
+        defaultResult.put("timeSeriesData", getTimeSeriesDataDefault(filter));
+        defaultResult.put("trendAnalysis", Map.of("trend", "STABLE", "change", 0.0));
+        defaultResult.put("filter", filter);
+        defaultResult.put("summary", "데이터를 불러올 수 없습니다.");
+        return defaultResult;
+    }
+    
+    // ========== 분석 메서드들 ==========
+    
+    /**
+     * 트렌드 분석
+     */
+    private Map<String, Object> analyzeTrend(List<TimeSeriesItem> data) {
+        if (data.isEmpty()) {
+            return Map.of("trend", "NO_DATA", "change", 0.0, "direction", "STABLE");
+        }
+        
+        // 첫 번째와 마지막 값 비교
+        TimeSeriesItem first = data.get(0);
+        TimeSeriesItem last = data.get(data.size() - 1);
+        
+        double change = first.count() > 0 ? 
+            ((last.count() - first.count()) * 100.0 / first.count()) : 0.0;
+        
+        String trend = determineTrend(change);
+        String direction = change > 0 ? "INCREASING" : change < 0 ? "DECREASING" : "STABLE";
+        
+        return Map.of(
+            "trend", trend,
+            "change", change,
+            "direction", direction,
+            "firstCount", first.count(),
+            "lastCount", last.count(),
+            "totalPeriods", data.size()
+        );
+    }
+    
+    /**
+     * 트렌드 분류
+     */
+    private String determineTrend(double change) {
+        if (Math.abs(change) > 50) return "SHARP_CHANGE";
+        if (Math.abs(change) > 20) return "SIGNIFICANT_CHANGE";
+        if (Math.abs(change) > 5) return "MODERATE_CHANGE";
+        return "STABLE";
+    }
+    
+    /**
+     * 트렌드 요약 생성
+     */
+    private String generateTrendSummary(Map<String, Object> trendAnalysis) {
+        String trend = (String) trendAnalysis.get("trend");
+        Double change = (Double) trendAnalysis.get("change");
+        String direction = (String) trendAnalysis.get("direction");
+        
+        String directionText = switch (direction) {
+            case "INCREASING" -> "증가";
+            case "DECREASING" -> "감소";
+            default -> "유지";
+        };
+        
+        return String.format("트렌드: %s, 변화율: %.1f%%, 방향: %s", trend, change, directionText);
+    }
+    
+    /**
      * Small Category를 Big Category로 매핑하는 유틸리티 메서드
      */
     private String mapSmallToBigCategory(String consultingCategory) {

@@ -10,6 +10,7 @@ com/insightops/dashboard/domain/DimBigCategory.class
 com/insightops/dashboard/dto/OverviewDto.class
 com/insightops/dashboard/repository/DimSmallCategoryRepository.class
 com/insightops/dashboard/dto/SmallTrendItem.class
+com/insightops/dashboard/dto/TimeSeriesItem.class
 com/insightops/dashboard/domain/AggBySmallAgeGender.class
 com/insightops/dashboard/client/AdminServiceClient$1.class
 com/insightops/dashboard/client/NormalizationServiceClient.class
@@ -19,6 +20,7 @@ com/insightops/dashboard/client/MailServiceClient.class
 com/insightops/dashboard/repository/AggBySmallAgeGenderRepository.class
 com/insightops/dashboard/config/RestTemplateConfig.class
 com/insightops/dashboard/repository/MessagePreviewCacheRepository.class
+com/insightops/dashboard/dto/TimeSeriesResponse.class
 com/insightops/dashboard/dto/CaseItem.class
 com/insightops/dashboard/client/VoicebotServiceClient$1.class
 com/insightops/dashboard/client/NormalizationServiceClient$1.class
@@ -30,6 +32,7 @@ com/insightops/dashboard/service/VocDataService.class
 com/insightops/dashboard/repository/DimBigCategoryRepository.class
 com/insightops/dashboard/domain/AggTotal.class
 com/insightops/dashboard/repository/AggTotalRepository$Point.class
+com/insightops/dashboard/dto/FilterRequest.class
 com/insightops/dashboard/dto/AssigneeDto.class
 com/insightops/dashboard/domain/VocListCache.class
 com/insightops/dashboard/domain/DimSmallCategory.class

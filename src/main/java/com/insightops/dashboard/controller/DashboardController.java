@@ -1,17 +1,22 @@
 package com.insightops.dashboard.controller;
 
+import com.insightops.dashboard.client.NormalizationServiceClient;
 import com.insightops.dashboard.domain.InsightCard;
 import com.insightops.dashboard.domain.MessagePreviewCache;
 import com.insightops.dashboard.dto.*;
 import com.insightops.dashboard.service.DashboardService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 대시보드 컨트롤러 - 모든 대시보드 API
@@ -20,11 +25,15 @@ import java.util.Map;
 @RequestMapping("/api/dashboard")
 @CrossOrigin(origins = "*")
 public class DashboardController {
-
-    private final DashboardService dashboardService;
     
-    public DashboardController(DashboardService dashboardService) {
+    private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
+    
+    private final DashboardService dashboardService;
+    private final NormalizationServiceClient normalizationClient;
+    
+    public DashboardController(DashboardService dashboardService, NormalizationServiceClient normalizationClient) {
         this.dashboardService = dashboardService;
+        this.normalizationClient = normalizationClient;
     }
 
     /**
@@ -190,5 +199,177 @@ public class DashboardController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate baseDate) {
         Map<String, Map<String, Object>> result = dashboardService.getBatchCounts(baseDate);
         return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 14. 시계열 데이터 조회 (필터링 지원)
+     * GET /api/dashboard/timeseries?startDate=2025-09-01&endDate=2025-09-10&period=daily
+     */
+    @GetMapping("/timeseries")
+    public ResponseEntity<TimeSeriesResponse> getTimeSeriesData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> ageGroups,
+            @RequestParam(required = false) List<String> genders,
+            @RequestParam(defaultValue = "date") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "100") Integer size) {
+        
+        FilterRequest filter = new FilterRequest(
+            startDate, endDate, period, categories, ageGroups, genders,
+            sortBy, sortOrder, page, size
+        );
+        
+        TimeSeriesResponse result = dashboardService.getTimeSeriesData(filter);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 15. 카테고리별 시계열 데이터 조회
+     * GET /api/dashboard/category-timeseries?startDate=2025-09-01&endDate=2025-09-10&period=weekly
+     */
+    @GetMapping("/category-timeseries")
+    public ResponseEntity<Map<String, TimeSeriesResponse>> getCategoryTimeSeriesData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> ageGroups,
+            @RequestParam(required = false) List<String> genders) {
+        
+        FilterRequest filter = new FilterRequest(
+            startDate, endDate, period, categories, ageGroups, genders
+        );
+        
+        Map<String, TimeSeriesResponse> result = dashboardService.getCategoryTimeSeriesData(filter);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 16. 연령대별 시계열 데이터 조회
+     * GET /api/dashboard/age-timeseries?startDate=2025-09-01&endDate=2025-09-10&period=monthly
+     */
+    @GetMapping("/age-timeseries")
+    public ResponseEntity<Map<String, TimeSeriesResponse>> getAgeGroupTimeSeriesData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> ageGroups,
+            @RequestParam(required = false) List<String> genders) {
+        
+        FilterRequest filter = new FilterRequest(
+            startDate, endDate, period, categories, ageGroups, genders
+        );
+        
+        Map<String, TimeSeriesResponse> result = dashboardService.getAgeGroupTimeSeriesData(filter);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 17. 성별 시계열 데이터 조회
+     * GET /api/dashboard/gender-timeseries?startDate=2025-09-01&endDate=2025-09-10&period=daily
+     */
+    @GetMapping("/gender-timeseries")
+    public ResponseEntity<Map<String, TimeSeriesResponse>> getGenderTimeSeriesData(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> ageGroups,
+            @RequestParam(required = false) List<String> genders) {
+        
+        FilterRequest filter = new FilterRequest(
+            startDate, endDate, period, categories, ageGroups, genders
+        );
+        
+        Map<String, TimeSeriesResponse> result = dashboardService.getGenderTimeSeriesData(filter);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 18. Small Category 트렌드 분석
+     * GET /api/dashboard/small-category-trend?startDate=2025-09-01&endDate=2025-09-10&period=weekly
+     */
+    @GetMapping("/small-category-trend")
+    public ResponseEntity<Map<String, Object>> getSmallCategoryTrend(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) List<String> ageGroups,
+            @RequestParam(required = false) List<String> genders) {
+        
+        FilterRequest filter = new FilterRequest(
+            startDate, endDate, period, categories, ageGroups, genders
+        );
+        
+        Map<String, Object> result = dashboardService.getSmallCategoryTrend(filter);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 19. 필터링된 VoC 목록 조회 (POST 방식 - 복잡한 필터 지원)
+     * POST /api/dashboard/filtered-cases
+     */
+    @PostMapping("/filtered-cases")
+    public ResponseEntity<Map<String, Object>> getFilteredCases(@RequestBody FilterRequest filter) {
+        try {
+            // Normalization Service에서 필터링된 데이터 조회
+            List<CaseItem> cases = normalizationClient.getVocEventsWithSummary(
+                filter.startDate().atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                filter.endDate().plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                null, filter.page() + 1, filter.size()
+            );
+            
+            // 필터링 적용 (서버 사이드 필터링)
+            List<CaseItem> filteredCases = applyFilters(cases, filter);
+            
+            // 결과 구성
+            Map<String, Object> result = new HashMap<>();
+            result.put("cases", filteredCases);
+            result.put("totalCount", filteredCases.size());
+            result.put("filter", filter);
+            result.put("page", filter.page());
+            result.put("size", filter.size());
+            
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            logger.error("필터링된 VoC 목록 조회 실패: {}", e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "데이터 조회 실패"));
+        }
+    }
+    
+    /**
+     * 필터링 적용 (서버 사이드)
+     */
+    private List<CaseItem> applyFilters(List<CaseItem> cases, FilterRequest filter) {
+        return cases.stream()
+            .filter(caseItem -> {
+                // 카테고리 필터
+                if (filter.hasCategoryFilter() && 
+                    !filter.categories().contains(caseItem.consultingCategoryName())) {
+                    return false;
+                }
+                
+                // 연령대 필터
+                if (filter.hasAgeGroupFilter() && 
+                    !filter.ageGroups().contains(caseItem.clientAge())) {
+                    return false;
+                }
+                
+                // 성별 필터
+                if (filter.hasGenderFilter() && 
+                    !filter.genders().contains(caseItem.clientGender())) {
+                    return false;
+                }
+                
+                return true;
+            })
+            .collect(Collectors.toList());
     }
 }
