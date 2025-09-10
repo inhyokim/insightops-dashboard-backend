@@ -14,9 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 대시보드 서비스 - MSA 구조에 맞게 외부 API 호출
@@ -25,6 +30,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 public class DashboardService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(DashboardService.class);
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final long RETRY_DELAY_MS = 1000;
 
     // 로컬 집계/캐시 리포지토리
     private final AggTotalRepository aggTotalRepo;
@@ -275,6 +284,86 @@ public class DashboardService {
      */
     public String getVocAnalysisResult(Long vocEventId) {
         return normalizationClient.getVocAnalysisResult(vocEventId);
+    }
+    
+    /**
+     * K. Top Small Category 계산 로직
+     */
+    public Map<String, Object> getTopSmallCategory(String period, LocalDate baseDate) {
+        try {
+            // Normalization Service에서 데이터 조회
+            LocalDate from = calculatePeriodStart(period, baseDate);
+            LocalDate to = baseDate;
+            
+            List<CaseItem> vocList = normalizationClient.getVocEventsWithSummary(
+                from.atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                to.plusDays(1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC),
+                null, 1, 10000);
+            
+            // Small Category별 집계
+            Map<String, Long> categoryCounts = vocList.stream()
+                .collect(Collectors.groupingBy(
+                    CaseItem::consultingCategoryName,
+                    Collectors.counting()
+                ));
+            
+            // Top Category 찾기
+            String topCategory = categoryCounts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("정보 없음");
+            
+            Long topCount = categoryCounts.getOrDefault(topCategory, 0L);
+            Long totalCount = categoryCounts.values().stream().mapToLong(Long::longValue).sum();
+            double topShare = totalCount > 0 ? (topCount * 100.0 / totalCount) : 0.0;
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("topCategory", topCategory);
+            result.put("topCount", topCount);
+            result.put("totalCount", totalCount);
+            result.put("topShare", topShare);
+            result.put("period", period);
+            result.put("baseDate", baseDate.toString());
+            
+            return result;
+            
+        } catch (Exception e) {
+            logger.error("Top Small Category 계산 실패: {}", e.getMessage());
+            Map<String, Object> fallback = new HashMap<>();
+            fallback.put("topCategory", "정보 없음");
+            fallback.put("topCount", 0L);
+            fallback.put("totalCount", 0L);
+            fallback.put("topShare", 0.0);
+            fallback.put("period", period);
+            fallback.put("baseDate", baseDate.toString());
+            return fallback;
+        }
+    }
+    
+    /**
+     * L. 기간별 시작일 계산
+     */
+    private LocalDate calculatePeriodStart(String period, LocalDate baseDate) {
+        return switch (period.toLowerCase()) {
+            case "daily" -> baseDate.minusDays(1);
+            case "weekly" -> baseDate.minusWeeks(1);
+            case "monthly" -> baseDate.minusMonths(1);
+            default -> baseDate.minusDays(1);
+        };
+    }
+    
+    /**
+     * M. Period별 비교 데이터 조회
+     */
+    public Map<String, Object> getPeriodComparison(String period, LocalDate baseDate) {
+        return vocDataService.getPeriodComparison(period, baseDate);
+    }
+    
+    /**
+     * N. 배치 집계 데이터 조회
+     */
+    public Map<String, Map<String, Object>> getBatchCounts(LocalDate baseDate) {
+        return vocDataService.getBatchPeriodCounts(baseDate);
     }
     
     /**

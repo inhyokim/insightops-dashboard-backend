@@ -156,4 +156,39 @@ public class DashboardController {
         String analysisResult = dashboardService.getVocAnalysisResult(vocEventId);
         return ResponseEntity.ok(Map.of("analysis_result", analysisResult));
     }
+    
+    /**
+     * 11. Top Small Category 조회
+     * GET /api/dashboard/top-small-category?period=daily&baseDate=2025-09-10
+     */
+    @GetMapping("/top-small-category")
+    public ResponseEntity<Map<String, Object>> getTopSmallCategory(
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate baseDate) {
+        Map<String, Object> result = dashboardService.getTopSmallCategory(period, baseDate);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 12. Period별 비교 데이터 조회
+     * GET /api/dashboard/period-comparison?period=weekly&baseDate=2025-09-10
+     */
+    @GetMapping("/period-comparison")
+    public ResponseEntity<Map<String, Object>> getPeriodComparison(
+            @RequestParam(defaultValue = "daily") String period,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate baseDate) {
+        Map<String, Object> result = dashboardService.getPeriodComparison(period, baseDate);
+        return ResponseEntity.ok(result);
+    }
+    
+    /**
+     * 13. 배치 집계 데이터 조회
+     * GET /api/dashboard/batch-counts?baseDate=2025-09-10
+     */
+    @GetMapping("/batch-counts")
+    public ResponseEntity<Map<String, Map<String, Object>>> getBatchCounts(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate baseDate) {
+        Map<String, Map<String, Object>> result = dashboardService.getBatchCounts(baseDate);
+        return ResponseEntity.ok(result);
+    }
 }
