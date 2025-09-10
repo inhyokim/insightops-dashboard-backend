@@ -1,6 +1,5 @@
 package com.insightops.dashboard.controller;
 
-import com.insightops.dashboard.scheduler.DataAggregationScheduler;
 import com.insightops.dashboard.service.VocDataService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +16,9 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AdminController {
 
-    private final DataAggregationScheduler aggregationScheduler;
     private final VocDataService vocDataService;
 
-    public AdminController(DataAggregationScheduler aggregationScheduler, VocDataService vocDataService) {
-        this.aggregationScheduler = aggregationScheduler;
+    public AdminController(VocDataService vocDataService) {
         this.vocDataService = vocDataService;
     }
 
@@ -35,13 +32,13 @@ public class AdminController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         
         try {
-            aggregationScheduler.aggregateDataForDateRange(from, to);
-            
+            // API 기반으로 변경되어 더 이상 로컬 집계를 수행하지 않음
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "데이터 집계가 완료되었습니다.",
+                "message", "API 기반 아키텍처로 변경됨 - 로컬 집계 비활성화",
                 "from", from.toString(),
-                "to", to.toString()
+                "to", to.toString(),
+                "note", "Voicebot Service API를 통해 실시간 데이터 조회"
             ));
             
         } catch (Exception e) {
@@ -91,11 +88,11 @@ public class AdminController {
     @PostMapping("/aggregate/daily")
     public ResponseEntity<Map<String, Object>> dailyAggregation() {
         try {
-            aggregationScheduler.aggregateVocData();
-            
+            // API 기반으로 변경되어 더 이상 로컬 집계를 수행하지 않음
             return ResponseEntity.ok(Map.of(
                 "success", true,
-                "message", "일일 데이터 집계가 완료되었습니다."
+                "message", "API 기반 아키텍처로 변경됨 - 로컬 집계 비활성화",
+                "note", "Voicebot Service API를 통해 실시간 데이터 조회"
             ));
             
         } catch (Exception e) {
