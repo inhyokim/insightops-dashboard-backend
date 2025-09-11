@@ -25,7 +25,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
 
 server:
-  port: ${PORT:3002}
+  port: ${PORT:8080}
 
 # 외부 MSA 서비스 연동 설정
 external:
@@ -64,4 +64,47 @@ logging:
     org.springframework.web: WARN
     org.hibernate.SQL: WARN
 
-# H2 profile removed - using MySQL only
+---
+# Local development profile with H2 database
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.H2Dialect
+
+# 로컬 개발환경에서는 외부 서비스 비활성화
+external:
+  normalization-service:
+    base-url: http://localhost:8001
+  mail-service:
+    base-url: http://localhost:8003
+  data-ingestion-service:
+    base-url: http://localhost:8000
+  voicebot-service:
+    base-url: http://localhost:8002
+  admin-service:
+    base-url: http://localhost:8004
+
+logging:
+  level:
+    root: INFO
+    com.insightops.dashboard: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
