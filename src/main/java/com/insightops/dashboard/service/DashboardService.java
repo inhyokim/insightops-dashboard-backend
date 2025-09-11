@@ -388,6 +388,13 @@ public class DashboardService {
     }
     
     /**
+     * H-1. 카테고리 기반 메일 생성 (새로운 Mail Contents Service 호출)
+     */
+    public MailGenerateResponseDto generateMailByCategory(String categoryId) {
+        return mailClient.generateMailByCategory(categoryId);
+    }
+    
+    /**
      * I. 메일 발송 (외부 Mail Service 호출)
      */
     public void sendMail(MailSendRequestDto request) {

@@ -154,6 +154,16 @@ public class DashboardController {
         dashboardService.sendMail(request);
         return ResponseEntity.ok().build();
     }
+
+    /**
+     * 9-1. 카테고리 기반 메일 생성 (새로운 Mail Contents Service 호출)
+     * POST /api/dashboard/mail/generate
+     */
+    @PostMapping("/mail/generate")
+    public ResponseEntity<MailGenerateResponseDto> generateMailByCategory(@RequestBody MailGenerateRequestDto request) {
+        MailGenerateResponseDto response = dashboardService.generateMailByCategory(request.categoryId());
+        return ResponseEntity.ok(response);
+    }
     
     /**
      * 10. VoC 상세보기 (Normalization Service API 호출)

@@ -11,6 +11,7 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/MessagePreviewCache.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/AggByCategoryAgeGenderRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/AggBySmallAgeGender.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/MailGenerateResponseDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/OverviewDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/CaseItem.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/SmallTrendItem.java
@@ -21,6 +22,7 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/AssigneeDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/DimSmallCategoryRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/controller/AdminController.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/MailGenerateRequestDto.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/controller/DashboardController.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/dto/FilterRequest.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/AggTotal.java
