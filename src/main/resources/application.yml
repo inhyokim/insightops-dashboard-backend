@@ -30,13 +30,13 @@ server:
 # 외부 MSA 서비스 연동 설정
 external:
   normalization-service:
-    base-url: ${NORMALIZATION_SERVICE_URL:http://localhost:8001}
+    base-url: ${NORMALIZATION_SERVICE_URL:https://insightops-classification-d2acc8afftgmhubt.koreacentral-01.azurewebsites.net}
   mail-service:
-    base-url: ${MAIL_SERVICE_URL:http://localhost:8003}
+    base-url: ${MAIL_SERVICE_URL:https://insightops-mailsend-e4drbwhqhge4bzam.koreacentral-01.azurewebsites.net}
   data-ingestion-service:
     base-url: ${DATA_INGESTION_SERVICE_URL:http://localhost:8000}
   voicebot-service:
-    base-url: ${VOICEBOT_SERVICE_URL:http://localhost:8002}
+    base-url: ${VOICEBOT_SERVICE_URL:https://insightops-voicebot-aud7gfhwc3fsb3h7.koreacentral-01.azurewebsites.net}
   admin-service:
     base-url: ${ADMIN_SERVICE_URL:http://localhost:8004}
 
@@ -92,13 +92,13 @@ spring:
 # 로컬 개발환경에서는 외부 서비스 비활성화
 external:
   normalization-service:
-    base-url: http://localhost:8001
+    base-url: https://insightops-classification-d2acc8afftgmhubt.koreacentral-01.azurewebsites.net
   mail-service:
-    base-url: http://localhost:8003
+    base-url: https://insightops-mailsend-e4drbwhqhge4bzam.koreacentral-01.azurewebsites.net
   data-ingestion-service:
     base-url: http://localhost:8000
   voicebot-service:
-    base-url: http://localhost:8002
+    base-url: https://insightops-voicebot-aud7gfhwc3fsb3h7.koreacentral-01.azurewebsites.net
   admin-service:
     base-url: http://localhost:8004
 

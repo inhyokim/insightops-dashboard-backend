@@ -28,7 +28,6 @@ com/insightops/dashboard/client/NormalizationServiceClient$1.class
 com/insightops/dashboard/scheduler/DataAggregationScheduler.class
 com/insightops/dashboard/client/VoicebotServiceClient$3.class
 com/insightops/dashboard/config/CorsConfig.class
-com/insightops/dashboard/service/DashboardService.class
 com/insightops/dashboard/repository/InsightCardRepository.class
 com/insightops/dashboard/service/VocDataService.class
 com/insightops/dashboard/repository/DimBigCategoryRepository.class
