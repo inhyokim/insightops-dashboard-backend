@@ -1,6 +1,7 @@
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/VocListCacheRepository.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/scheduler/DataAggregationScheduler.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/DimBigCategoryRepository.java
+/Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/config/CorsConfig.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/domain/InsightCard.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/DashboardApplication.java
 /Users/keeminhyo/insightops-dashboard-backend/src/main/java/com/insightops/dashboard/repository/MessagePreviewCacheRepository.java

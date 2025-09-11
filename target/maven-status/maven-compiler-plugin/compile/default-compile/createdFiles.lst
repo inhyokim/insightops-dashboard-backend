@@ -22,10 +22,12 @@ com/insightops/dashboard/config/RestTemplateConfig.class
 com/insightops/dashboard/repository/MessagePreviewCacheRepository.class
 com/insightops/dashboard/dto/TimeSeriesResponse.class
 com/insightops/dashboard/dto/CaseItem.class
+com/insightops/dashboard/config/CorsConfig$1.class
 com/insightops/dashboard/client/VoicebotServiceClient$1.class
 com/insightops/dashboard/client/NormalizationServiceClient$1.class
 com/insightops/dashboard/scheduler/DataAggregationScheduler.class
 com/insightops/dashboard/client/VoicebotServiceClient$3.class
+com/insightops/dashboard/config/CorsConfig.class
 com/insightops/dashboard/service/DashboardService.class
 com/insightops/dashboard/repository/InsightCardRepository.class
 com/insightops/dashboard/service/VocDataService.class
